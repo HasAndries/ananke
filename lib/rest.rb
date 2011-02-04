@@ -9,25 +9,43 @@ module Rest
   @default_repository = 'Repository'
 
   def build(path)
+    #TODO - Check if Modules Exist
     mod = Module.const_get(Rest.default_repository.to_sym).const_get("#{path.capitalize}".to_sym)
     key = @id[:key]
+
+    #TODO - Check if Repository Supports Resource
     Sinatra::Base.get "/#{path}/:user_id" do
       ret = mod.one(params[key]) if !params[key].nil?
+      #TODO - Hyper Links(Common place maybe?)
       ret.respond_to?(:to_json) ? ret.to_json : ret
     end
+
+    #TODO - Check if Repository Supports Resource
     Sinatra::Base.get "/#{path}/?" do
       ret = mod.all
+      #TODO - Hyper Links(Common place maybe?)
       ret.respond_to?(:to_json) ? ret.to_json : ret
     end
+
+    #TODO - Check if Repository Supports Resource
     Sinatra::Base.post "/#{path}/?" do
+      #TODO - Parameter Validation
       ret = mod.new(params)
-      status 200
+      status 201
+      #TODO - Hyper Links for Created Resource
     end
+
+    #TODO - Check if Repository Supports Resource
     Sinatra::Base.put "/#{path}/:id" do
+      #TODO - Parameter Validation
       mod.edit(params[key], params) if !params[key].nil?
       status 200
+      #TODO - Hyper Links
     end
+
+    #TODO - Check if Repository Supports Resource
     Sinatra::Base.delete "/#{path}/:id" do
+      #TODO - Parameter Validation
       mod.trash(params[key]) if !params[key].nil?
       status 200
     end
