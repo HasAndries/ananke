@@ -2,26 +2,26 @@
 
 Sinatra-REST is a DSL that extends the functionality of Sinatra for easy creation of Restful Services and Resources:
 
-#myapp.rb
-require './lib/sinatra/rest'
-require 'sinatra/main' #This is only for Demo purposes
-#--------------------Repositories---------------------
-module Repository
-  module User
-    @data = [{:id => '1', :name => 'One'}, {:id => '2', :name => 'Two'}]
-    def self.all
-      @data.to_s
-    end
-    def self.one(id)
-      index = @data.index{ |d| d[:id] == id}
-      (index.nil? && '') || @data[index].to_s
+  #myapp.rb
+  require './lib/sinatra/rest'
+  require 'sinatra/main' #This is only for Demo purposes
+  #--------------------Repositories---------------------
+  module Repository
+    module User
+      @data = [{:id => '1', :name => 'One'}, {:id => '2', :name => 'Two'}]
+      def self.all
+        @data.to_s
+      end
+      def self.one(id)
+        index = @data.index{ |d| d[:id] == id}
+        (index.nil? && '') || @data[index].to_s
+      end
     end
   end
-end
-#-------------------REST Resources--------------------
-rest :user do
-  id :id
-end
+  #-------------------REST Resources--------------------
+  rest :user do
+    id :id
+  end
 
 Install the gem and run with:
 
@@ -35,28 +35,28 @@ One User    - http://localhost:4567/user/1
 `rest` defines a complete Resource, and constructs Sinatra Routes
 based on what's available in it's respective Repository. Routes are:
 
-get     '/name/?'   -> Repository::Capitalize(name).all
-get     '/name/id'  -> Repository::Capitalize(name).one(id)
-post    '/name'     -> Repository::Capitalize(name).new(data)
-put     '/name/id'  -> Repository::Capitalize(name).edit(id, data)
-delete  '/name/id'  -> Repository::Capitalize(name).trash(id)
+  get     '/name/?'   -> Repository::Capitalize(name).all
+  get     '/name/id'  -> Repository::Capitalize(name).one(id)
+  post    '/name'     -> Repository::Capitalize(name).new(data)
+  put     '/name/id'  -> Repository::Capitalize(name).edit(id, data)
+  delete  '/name/id'  -> Repository::Capitalize(name).trash(id)
 
 == Repositories
 The Default Repository can be changed:
 
-    rest.default_repository = 'MyRepository'
+ rest.default_repository = 'MyRepository'
 
 == Future
 A short list of future development:
- - Refactor!
- - Return Value Strategy
- - Parameter Validation
- - Resource Exposes Media Type
- - HyperMedia
- - Lots more `bullet-proofing`
+  - Refactor!
+  - Return Value Strategy
+  - Parameter Validation
+  - Resource Exposes Media Type
+  - HyperMedia
+  - Lots more `bullet-proofing`
 
 == More
 
 * {Project Website}[http://https://github.com/HasAndries/sinatra-rest/]
-* {Issue tracker}https://github.com/HasAndries/sinatra-rest/issues]
+* {Issue tracker}[https://github.com/HasAndries/sinatra-rest/issues]
 * {Twitter}[http://twitter.com/HasAndries]
