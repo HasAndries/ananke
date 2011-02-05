@@ -1,9 +1,9 @@
-= Sinatra-REST
+= Ananke
 
-Sinatra-REST is a DSL that extends the functionality of Sinatra for easy creation of Restful Services and Resources:
+Ananke is a DSL that extends the functionality of Sinatra for easy creation of Restful Services and Resources:
 
   #myapp.rb
-  require './lib/sinatra/rest'
+  require 'ananke'
   require 'sinatra/main' #This is only for Demo purposes
   #--------------------Repositories---------------------
   module Repository
@@ -25,7 +25,7 @@ Sinatra-REST is a DSL that extends the functionality of Sinatra for easy creatio
 
 Install the gem and run with:
 
-  gem install sinatra-rest
+  gem install ananke
   ruby -rubygems myapp.rb
 
 All Users
@@ -51,14 +51,14 @@ The REST media type can be built up:
 == Repositories
 The Default Repository can be changed:
 
- rest.default_repository = 'MyRepository'
+ ananke.default_repository = 'MyRepository'
 
 == Validation
 Validation can be added on any field by providing arguments after a field declaration:
 
-  required :name, length => 4
+  required :name, :length => 4
 
-This will cause the paramater to be validated against the method defined in Rest::Rules. Custom Rules
+This will cause the paramater to be validated against the method defined in Ananke::Rules. Custom Rules
 can be added to the module and provided as arguments. Current Default included rules are:
 
   length(value, min)
@@ -72,9 +72,10 @@ A short list of future development:
   - Resource Exposes Media Type
   - HyperMedia
   - Lots more `bullet-proofing`
+  - ETag Support
 
 == More
 
-* {Project Website}[http://https://github.com/HasAndries/sinatra-rest/]
-* {Issue tracker}[https://github.com/HasAndries/sinatra-rest/issues]
+* {Project Website}[http://https://github.com/HasAndries/ananke/]
+* {Issue tracker}[https://github.com/HasAndries/ananke/issues]
 * {Twitter}[http://twitter.com/HasAndries]
