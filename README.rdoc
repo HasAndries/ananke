@@ -28,8 +28,10 @@ Install the gem and run with:
   gem install sinatra-rest
   ruby -rubygems myapp.rb
 
-All Users   - http://localhost:4567/user
-One User    - http://localhost:4567/user/1
+All Users
+  http://localhost:4567/user
+One User
+  http://localhost:4567/user/1
 
 == REST Resources
 `rest` defines a complete Resource, and constructs Sinatra Routes
@@ -39,15 +41,31 @@ based on what's available in it's respective Repository. Routes are:
   get     '/name/id'  -> Repository::Capitalize(name).one(id)
   post    '/name'     -> Repository::Capitalize(name).new(data)
   put     '/name/id'  -> Repository::Capitalize(name).edit(id, data)
-  delete  '/name/id'  -> Repository::Capitalize(name).trash(id)
+  delete  '/name/id'  -> Repository::Capitalize(name).delete(id)
+
+The REST media type can be built up:
+
+  required :name
+  optional :country
 
 == Repositories
 The Default Repository can be changed:
 
  rest.default_repository = 'MyRepository'
 
+== Validation
+Validation can be added on any field by providing arguments after a field declaration:
+
+  required :name, length => 4
+
+This will cause the paramater to be validated against the method defined in Rest::Rules. Custom Rules
+can be added to the module and provided as arguments. Current Default included rules are:
+
+  length(value, min)
+
 == Future
 A short list of future development:
+  - Change Project Name
   - Refactor!
   - Return Value Strategy
   - Parameter Validation

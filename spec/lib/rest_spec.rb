@@ -12,9 +12,9 @@ describe 'Resource' do
   before(:all) do
     rest :user do
       id :user_id, :number
-      required :username, :length => '>=4'
-      required 'email', :email
-      optional :country, :country
+      required :username, :length => 4
+      required 'email'
+      optional :country
 
       media "Get All Vehicles", :get, :vehicles, :user_id
     end
@@ -36,6 +36,7 @@ describe 'Resource' do
     Sinatra::Base.routes["DELETE"][-1][0].inspect.include?('user').should == true
   end
 
+  #----------------------------BASIC--------------------------------------
   it """
     GET /user
       - code:     200
@@ -60,14 +61,14 @@ describe 'Resource' do
   
   it """
     POST /user
-      - body:{id:3, name:'three'}
-    RETURN
-      - code:         200
-      - content-type: text/json
       - body:         {user_id: ,username: ,email: ,country: }
+    RETURN
+      - code:         201
+      - content-type: text/json
+      - body:         
   """ do
-    post "/user", body={:user_id => 3, :username => 'three', :email => '3@three.com', :country => 'USA'}.to_json
-    last_response.status.should == 200
+    post "/user", body={:user_id => 3, :username => 'three', :email => '3@three.com', :country => 'USA'}
+    last_response.status.should == 201
     last_response.body.should == ''
   end
 
@@ -79,7 +80,7 @@ describe 'Resource' do
       - content-type: text/json
       - body:
   """ do
-    put "/user/3", body={:user_id => 3, :username => 'four', :email => '4@four.com', :country => 'Russia'}.to_json
+    put "/user/3", body={:user_id => 3, :username => 'four', :email => '4@four.com', :country => 'Russia'}
     last_response.status.should == 200
     last_response.body.should == ''
   end
@@ -95,6 +96,20 @@ describe 'Resource' do
     last_response.status.should == 200
     last_response.body.should == ''
   end
+  #--------------------------VALIDATION-----------------------------------
+  it """
+    POST /user
+      - body:         {user_id: ,username: ,email: ,country: }
+    RETURN
+      - code:         400
+      - content-type: text/json
+      - body:         username too short
+  """ do
+    post "/user", body={:user_id => 3, :username => '', :email => '3@three.com', :country => 'USA'}
+    last_response.status.should == 400
+    last_response.body.should == 'username: Value must be at least 4 characters long'
+  end
+
 end
 
 module Repository
