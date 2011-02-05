@@ -1,5 +1,5 @@
 require './spec/spec_helper'
-require './lib/rest'
+require './lib/sinatra/rest'
 
 describe 'Resource' do
   include Rack::Test::Methods
