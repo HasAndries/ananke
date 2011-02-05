@@ -14,7 +14,7 @@ module Rest
     key = @id[:key]
 
     #TODO - Check if Repository Supports Resource
-    Sinatra::Base.get "/#{path}/:user_id" do
+    Sinatra::Base.get "/#{path}/:#{key}" do
       ret = mod.one(params[key]) if !params[key].nil?
       #TODO - Hyper Links(Common place maybe?)
       ret.respond_to?(:to_json) ? ret.to_json : ret
@@ -36,7 +36,7 @@ module Rest
     end
 
     #TODO - Check if Repository Supports Resource
-    Sinatra::Base.put "/#{path}/:id" do
+    Sinatra::Base.put "/#{path}/:#{key}" do
       #TODO - Parameter Validation
       mod.edit(params[key], params) if !params[key].nil?
       status 200
@@ -44,7 +44,7 @@ module Rest
     end
 
     #TODO - Check if Repository Supports Resource
-    Sinatra::Base.delete "/#{path}/:id" do
+    Sinatra::Base.delete "/#{path}/:#{key}" do
       #TODO - Parameter Validation
       mod.trash(params[key]) if !params[key].nil?
       status 200
@@ -74,3 +74,5 @@ module Rest
     @links << {:rel => rel, :method => method, :resource => resource, :field => field}
   end
 end
+
+include Rest

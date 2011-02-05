@@ -17,9 +17,9 @@ gemspec = Gem::Specification.new do |gem|
 
   gem.rubygems_version   = "1.3.7"
 
-  gem.files            = FileList['lib/**/*', 'spec/**/*', 'Gemfile', 'Rakefile', 'README']
+  gem.files            = FileList['lib/**/*', 'spec/**/*', 'Gemfile', 'Rakefile', 'README.rdoc']
   gem.test_files       = FileList['spec/**/*']
-  gem.extra_rdoc_files = [ "README" ]
+  gem.extra_rdoc_files = [ "README.rdoc" ]
   gem.rdoc_options     = ["--charset=UTF-8"]
   gem.require_path     = "lib"
 
@@ -27,7 +27,7 @@ gemspec = Gem::Specification.new do |gem|
 
   Thank you for installing #{gem.summary}
 
-  Please be sure to look at README to see what might have changed
+  Please be sure to look at README.rdoc to see what might have changed
   since the last release and how to use this GEM.
 
 **************************************************
