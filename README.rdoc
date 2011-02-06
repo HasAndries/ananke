@@ -61,14 +61,47 @@ Validation can be added on any field by providing arguments after a field declar
 This will cause the paramater to be validated against the method defined in Ananke::Rules. Custom Rules
 can be added to the module and provided as arguments. Current Default included rules are:
 
-  length(value, min)
+  length(min)
+
+Validation Methods are Invoked in the Ananke::Rules context, and has access to a class variable named
+value, which holds the value for the currently valuated Parameter.
+
+To Add a Custom Rule:
+
+  rule :name, do
+    value == [expected] ? nil : 'Not Expected Value'
+  end
+
+  required :name, :name
+
+or
+
+  module Ananke
+    module Rules
+      def validate_name
+        value == [expected] ? nil : 'Not Expected Value'
+      end
+    end
+  end
+
+  required :name, :name
+
+or Advanced
+
+  module Ananke
+    module Rules
+      def validate_name(extra)
+        value == [expected using extra] ? nil : 'Not Expected Value'
+      end
+    end
+  end
+
+  required :name, :name => extra
 
 == Future
 A short list of future development:
-  - Change Project Name
   - Refactor!
   - Return Value Strategy
-  - Parameter Validation
   - Resource Exposes Media Type
   - HyperMedia
   - Lots more `bullet-proofing`
