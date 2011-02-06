@@ -11,7 +11,7 @@ module Ananke
 
   def build(path)
     #TODO - Check if Modules Exist
-    mod = Module.const_get(Rest.default_repository.to_sym).const_get("#{path.capitalize}".to_sym)
+    mod = Module.const_get(Ananke.default_repository.to_sym).const_get("#{path.capitalize}".to_sym)
     key = @id[:key]
     fields = @fields
     links = @links
@@ -61,8 +61,9 @@ module Ananke
     fields.each do |field|
       value = params[field[:key].to_s]
       errors << "Missing Required Parameter: #{field[:key]}" if field[:type] == :required && value.nil?
+      Ananke::Rules.value = value
       field[:rules].each do |r|
-        res = r.class == Hash ? Rest::Rules.send(r.first[0], value, r.first[1]) : Rest::Rules.send(r, value)
+        res = r.class == Hash ? Ananke::Rules.send("validate_#{r.first[0]}", r.first[1]) : Ananke::Rules.send("validate_#{r}")
         errors << "#{field[:key]}: #{res}" unless res.nil?
       end
     end
@@ -92,14 +93,17 @@ module Ananke
     @links << {:rel => rel, :method => method, :resource => resource, :field => field}
   end
   def rule(name, &block)
-    Rest::Rules.send(:define_method, name, block)
+    Ananke::Rules.send(:define_singleton_method, "validate_#{name}", block)
   end
 
   module Rules
-    def self.length(value, min)
+    class << self
+      attr_accessor :value
+    end
+    def self.validate_length(min)
       value.length >= min ? nil : "Value must be at least #{min} characters long"
     end
   end
 end
 
-include Rest
+include Ananke
