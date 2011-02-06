@@ -11,8 +11,8 @@ describe 'Resource' do
 
   before(:all) do
     rest :user do
-      id :user_id, :number
-      required :username, :length => 4
+      id :user_id
+      required :username
       required 'email'
       optional :country
 
@@ -96,20 +96,6 @@ describe 'Resource' do
     last_response.status.should == 200
     last_response.body.should == ''
   end
-  #--------------------------VALIDATION-----------------------------------
-  it """
-    POST /user
-      - body:         {user_id: ,username: ,email: ,country: }
-    RETURN
-      - code:         400
-      - content-type: text/json
-      - body:         username too short
-  """ do
-    post "/user", body={:user_id => 3, :username => '', :email => '3@three.com', :country => 'USA'}
-    last_response.status.should == 400
-    last_response.body.should == 'username: Value must be at least 4 characters long'
-  end
-
 end
 
 module Repository
