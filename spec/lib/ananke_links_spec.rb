@@ -11,22 +11,28 @@ describe 'Resource' do
 
   #--------------------------MEDIA----------------------------------------
   it """
-  Should be able to Output link to Self
+  Should be able to Output link to Self and Call that link
   """ do
     module Repository
-      module Basic
-        def self.new(data)end
+      module Computer
+        def self.one(id) end
+        def self.add(data)
+          {:user_id => 1}
+        end
       end
     end
-    rest :media_self do
+    rest :computer do
       id :user_id
+
     end
 
-    post "/media_self", body={:user_id => 1, :username => ''}
+    post "/computer", body={:user_id => 1, :username => '1234'}
+    check_status(201)
+    last_response.body.should == '[{"rel":"self","uri":"/computer/1"}]'
 
-    post "/basic", body={:user_id => 1, :username => '1234'}
-    last_response.status.should == 201
-    last_response.body.should == '{:}'
+    hash = JSON.parse(last_response.body)
+    get hash[0]['uri']
+    check_status(200)
   end
 
 end

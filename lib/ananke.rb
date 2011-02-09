@@ -19,7 +19,7 @@ module Ananke
       :error    => true
   }
 
-  #-------------Output Methods--------------
+  #===========================OUTPUT=============================
   def out(type, message)
     return if !Ananke.settings[:output]
     message = case
@@ -30,13 +30,13 @@ module Ananke
       when type == :error && Ananke.settings[:error]
         message.red
       else
-        message
+        message = nil
     end
-    puts message
+    puts message unless message.nil?
     message
   end
 
-  #-------------Helpers---------------------
+  #===========================HELPERS============================
   def get_mod(path)
     mod = nil
     rep = Module.const_get(Ananke.default_repository.to_sym) if Module.const_defined?(Ananke.default_repository.to_sym)
@@ -44,7 +44,7 @@ module Ananke
     mod
   end
 
-  #-------------Buildup---------------------
+  #===========================BUILDUP============================
   def build_route(mod, mod_method, verb, route, &block)
     if mod.respond_to? mod_method
       Sinatra::Base.send verb, "#{route}", do
@@ -53,12 +53,6 @@ module Ananke
     else
       out(:warning, "#{mod} does not respond to '#{mod_method.to_s}'")
     end
-  end
-
-  def build_links(path, id)
-    links = []
-    links << {:rel => :self, :uri => "/#{path}/:#{id}"}
-    links
   end
   
   def build(path)
@@ -88,16 +82,28 @@ module Ananke
       ret.nil? ? nil : ret.respond_to?(:to_json) ? ret.to_json : ret
     end
 
-    build_route mod, :new, :post, "/#{path}/?" do
+    build_route mod, :add, :post, "/#{path}/?" do
       status, message = validate(fields, params)
       error status, message unless status.nil?
 
-      ret = mod.new(params)
+      ret = mod.add(params)
 
-      status 201
       #TODO - Hyper Links for Created Resource
-      build_links(path, ret[key])
+=begin
+      if !links.empty?
+        if ret.nil?
+          out :error, "#{path} - No return object for add"
+        elsif !ret.has_key?(key)
+          out :error, "#{path} - Return object does not contain key(#{key})"
+        else
+          linkup(path, params[key], mod, links)
+        end
+      end
+=end
+      media = linkup(path, params[key], mod, links)
       #ret.nil? ? nil : ret.respond_to?(:to_json) ? ret.to_json : ret
+      status 201
+      media.to_json
     end
 
     build_route mod, :edit, :put, "/#{path}/:#{key}" do
@@ -129,7 +135,7 @@ module Ananke
     end
   end
 
-  #-------------Validation------------------
+  #===========================Validation=========================
   def validate(fields, params)
     errors = []
     fields.each do |field|
@@ -147,14 +153,22 @@ module Ananke
     error 400, "Missing Parameter: #{key.to_s}"
   end
 
+  #===========================LINKING============================
+  def linkup(path, id, mod, links)
+    ret = []
+    ret << {:rel => 'self', :uri => "/#{path}/#{id}"}
+    ret
+  end
+
   public
 
-  #-------------DSL-------------------------
+  #===========================DSL================================
   def rest(path, &block)
     @id = {}
     @fields = []
     @links = []
     yield block
+    media :self, :get, path, @id[:key]
     build path
   end
 
@@ -174,7 +188,7 @@ module Ananke
     Ananke::Rules.send(:define_singleton_method, "validate_#{name}", block)
   end
 
-  #-------------Rules-----------------------
+  #===========================Rules==============================
   module Rules
     class << self
       attr_accessor :value
@@ -184,7 +198,7 @@ module Ananke
     end
   end
 
-  #-------------Settings--------------------
+  #===========================Settings===========================
   def set(name, val)
     @settings[name] = val
   end

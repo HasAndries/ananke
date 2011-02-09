@@ -16,7 +16,7 @@ describe 'Resource' do
   """ do
     module Repository
       module Basic
-        def self.new(data)end
+        def self.add(data)end
       end
     end
     rest :basic do
@@ -25,11 +25,11 @@ describe 'Resource' do
     end
 
     post "/basic", body={:user_id => 1, :username => ''}
-    last_response.status.should == 400
+    check_status(400)
     last_response.body.should == 'username: Value must be at least 4 characters long'
 
     post "/basic", body={:user_id => 1, :username => '1234'}
-    last_response.status.should == 201
+    check_status(201)
   end
 
   it """
@@ -46,7 +46,7 @@ describe 'Resource' do
 
     module Repository
       module Explicit
-        def self.new(data)end
+        def self.add(data)end
       end
     end
     rest :explicit do
@@ -55,11 +55,11 @@ describe 'Resource' do
     end
 
     post "/explicit", body={:user_id => 1, :email => 'some'}
-    last_response.status.should == 400
+    check_status(400)
     last_response.body.should == 'email: Invalid Email: some'
 
     post "/explicit", body={:user_id => 1, :email => 'some1@some.com'}
-    last_response.status.should == 201
+    check_status(201)
   end
 
   it """
@@ -70,7 +70,7 @@ describe 'Resource' do
     end
     module Repository
       module Added
-        def self.new(data)end
+        def self.add(data)end
       end
     end
     rest :added do
@@ -80,10 +80,10 @@ describe 'Resource' do
     Ananke::Rules.respond_to?('validate_country').should == true
 
     post "/added", body={:user_id => 1, :country => 'England'}
-    last_response.status.should == 400
+    check_status(400)
     last_response.body.should == 'country: Not from South Africa'
 
     post "/added", body={:user_id => 1, :country => 'South Africa'}
-    last_response.status.should == 201
+    check_status(201)
   end
 end

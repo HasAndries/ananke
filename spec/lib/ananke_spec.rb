@@ -50,7 +50,7 @@ describe 'Basic Ananke REST' do
       - body:     [{:id=>1, :name=>'one'}, {:id => 2, :name => 'two'}]
   """ do
     get "/user"
-    last_response.status.should == 200
+    check_status(200)
     last_response.body.should == Repository::User.data.to_json
   end
 
@@ -61,7 +61,7 @@ describe 'Basic Ananke REST' do
       - body:         {user_id: ,username: ,email: ,country: }
   """ do
     get "/user/1"
-    last_response.status.should == 200
+    check_status(200)
     last_response.body.should == Repository::User.data[0].to_json
   end
 
@@ -74,8 +74,7 @@ describe 'Basic Ananke REST' do
       - body:
   """ do
     post "/user", body={:user_id => 3, :username => 'three', :email => '3@three.com', :country => 'USA'}
-    last_response.status.should == 201
-    last_response.body.should == ''
+    check_status(201)
   end
 
   it """
@@ -87,8 +86,7 @@ describe 'Basic Ananke REST' do
       - body:
   """ do
     put "/user/3", body={:user_id => 3, :username => 'four', :email => '4@four.com', :country => 'Russia'}
-    last_response.status.should == 200
-    last_response.body.should == ''
+    check_status(200)
   end
 
   it """
@@ -99,8 +97,7 @@ describe 'Basic Ananke REST' do
       - body:
   """ do
     delete "/user/3"
-    last_response.status.should == 200
-    last_response.body.should == ''
+    check_status(200)
   end
 
   #----------------------------FAILS--------------------------------------
@@ -113,7 +110,7 @@ describe 'Basic Ananke REST' do
       - body:         Missing Parameter: user_id
   """ do
     put "/user", body={:user_id => 3, :username => 'four', :email => '4@four.com', :country => 'Russia'}
-    last_response.status.should == 400
+    check_status(400)
     last_response.body.should == 'Missing Parameter: user_id'
   end
 
@@ -125,7 +122,7 @@ describe 'Basic Ananke REST' do
       - body:         Missing Parameter: user_id
   """ do
     delete "/user"
-    last_response.status.should == 400
+    check_status(400)
     last_response.body.should == 'Missing Parameter: user_id'
   end
 end
@@ -145,11 +142,13 @@ module Repository
     def self.all
       @data
     end
-    def self.new(data)
+    def self.add(data)
       @data << data
+      data
     end
     def self.edit(id, data)
       @data.each { |d| d = data if d[:user_id] == id}
+      data
     end
     def self.delete(id)
       @data.delete_if { |i| i[:user_id] == id}
