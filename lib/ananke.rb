@@ -101,6 +101,8 @@ module Ananke
       end
 =end
       media = linkup(path, params[key], mod, links)
+      ret = Object.new if ret.nil?
+      ret.instance_variable_set(:@links, media)
       #ret.nil? ? nil : ret.respond_to?(:to_json) ? ret.to_json : ret
       status 201
       media.to_json
