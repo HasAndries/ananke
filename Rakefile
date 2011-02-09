@@ -13,9 +13,9 @@ gemspec = Gem::Specification.new do |gem|
   gem.email       = "andriesc@mixtel.com"
   gem.summary     = "#{gem.name}-#{Ananke::VERSION}"
   gem.description = "Full REST Implementation on top of Sinatra"
-  gem.homepage    = "git@github.com:HasAndries/ananke.git"
+  gem.homepage    = "https://github.com/HasAndries/ananke"
 
-  gem.rubygems_version   = "1.3.7"
+  gem.rubygems_version   = "1.5.0"
 
   gem.files            = FileList['lib/**/*', 'spec/**/*', 'Gemfile', 'Rakefile', 'README.rdoc']
   gem.test_files       = FileList['spec/**/*']
@@ -32,13 +32,13 @@ gemspec = Gem::Specification.new do |gem|
 
 **************************************************
 }
-  gem.add_dependency             "sinatra",   "~> 1.1.0"
+  gem.add_dependency             "sinatra",   "~> 1.1.2"
 
   gem.add_development_dependency "colored",   "~> 1.2"
   gem.add_development_dependency "json",      "~> 1.5.1"
   gem.add_development_dependency "rack-test", "~> 0.5.6"
   gem.add_development_dependency "rake",      "~> 0.8.7"
-  gem.add_development_dependency "rspec",     "~> 2.1.0"
+  gem.add_development_dependency "rspec",     "~> 2.5.0"
   gem.add_development_dependency "simplecov", "~> 0.3.9"
 end
  
