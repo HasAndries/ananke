@@ -1,27 +1,31 @@
 require './spec/spec_helper'
 require './lib/ananke'
 
-describe 'Resource' do
+describe 'Basic Ananke REST' do
   include Rack::Test::Methods
   include Ananke
 
   def app
     Sinatra::Base
   end
-
-  before(:all) do
+  #----------------------------SETUP--------------------------------------
+  it """
+  Should be able to describe a Valid REST Resource
+  """ do
     rest :user do
       id :user_id
-      required :username
-      required 'email'
-      optional :country
-
-      media "Get All Vehicles", :get, :vehicles, :user_id
+    end
+  end
+  
+  it """
+  Should skip creating Routes for Non-Existing Repositories
+  """ do
+    rest :invalid do
     end
   end
 
   it """
-  Should setup the defaults for ReST
+  Should setup the defaults for REST
   """ do
     Ananke.default_repository.should == 'Repository'
   end
@@ -97,6 +101,32 @@ describe 'Resource' do
     delete "/user/3"
     last_response.status.should == 200
     last_response.body.should == ''
+  end
+
+  #----------------------------FAILS--------------------------------------
+  it """
+    PUT /user
+      - body:         {user_id: ,username: ,email: ,country: }
+    RETURN
+      - code:         400
+      - content-type: text/json
+      - body:         Missing Parameter: user_id
+  """ do
+    put "/user", body={:user_id => 3, :username => 'four', :email => '4@four.com', :country => 'Russia'}
+    last_response.status.should == 400
+    last_response.body.should == 'Missing Parameter: user_id'
+  end
+
+  it """
+    DELETE /user
+    RETURN
+      - code:         400
+      - content-type: text/json
+      - body:         Missing Parameter: user_id
+  """ do
+    delete "/user"
+    last_response.status.should == 400
+    last_response.body.should == 'Missing Parameter: user_id'
   end
 end
 

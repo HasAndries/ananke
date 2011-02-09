@@ -1,5 +1,6 @@
-require 'sinatra/base'
 require 'colored'
+require 'json'
+require 'sinatra/base'
 
 module Ananke
   class << self
@@ -27,17 +28,20 @@ module Ananke
       when type == :warning && Ananke.settings[:warning]
         message.yellow
       when type == :error && Ananke.settings[:error]
-        message.yellow
+        message.red
       else
         message
     end
     puts message
+    message
   end
 
   #-------------Helpers---------------------
   def get_mod(path)
-    mod = Module.const_get(Ananke.default_repository.to_sym)
-    mod = mod.const_get("#{path.capitalize}".to_sym) unless mod.nil?
+    mod = nil
+    rep = Module.const_get(Ananke.default_repository.to_sym) if Module.const_defined?(Ananke.default_repository.to_sym)
+    mod = rep.const_get("#{path.capitalize}".to_sym) if !rep.nil? && rep.const_defined?("#{path.capitalize}".to_sym)
+    mod
   end
 
   #-------------Buildup---------------------
@@ -49,6 +53,12 @@ module Ananke
     else
       out(:warning, "#{mod} does not respond to '#{mod_method.to_s}'")
     end
+  end
+
+  def build_links(path, id)
+    links = []
+    links << {:rel => :self, :uri => "/#{path}/:#{id}"}
+    links
   end
   
   def build(path)
@@ -86,6 +96,7 @@ module Ananke
 
       status 201
       #TODO - Hyper Links for Created Resource
+      build_links(path, ret[key])
       #ret.nil? ? nil : ret.respond_to?(:to_json) ? ret.to_json : ret
     end
 
@@ -101,12 +112,20 @@ module Ananke
       #ret.nil? ? nil : ret.respond_to?(:to_json) ? ret.to_json : ret
     end
 
+    build_route mod, :edit, :put, "/#{path}/?" do
+      param_missing!(key)
+    end
+
     build_route mod, :delete, :delete, "/#{path}/:#{key}" do
       param_missing!(key) if params[key].nil?
 
       mod.delete(params[key]) if !params[key].nil?
       
       status 200
+    end
+
+    build_route mod, :delete, :delete, "/#{path}/?" do
+      param_missing!(key)
     end
   end
 
