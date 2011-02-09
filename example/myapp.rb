@@ -1,6 +1,8 @@
 #myapp.rb
 require './lib/ananke'
-require 'sinatra/main' #This is only for Demo purposes
+#-----------This is only for Demo purposes------------
+require 'sinatra/main'
+Sinatra::Base.set :public, Proc.new { File.join(root, "../public") }
 #--------------------Repositories---------------------
 module Repository
   module User

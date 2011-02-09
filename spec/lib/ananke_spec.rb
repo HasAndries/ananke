@@ -30,7 +30,9 @@ describe 'Resource' do
   Should setup Routes
   """ do
     Sinatra::Base.routes["GET"][-1][0].inspect.include?('user').should == true
-    Sinatra::Base.routes["GET"].length.should == 2
+    count = 0
+    Sinatra::Base.routes["GET"].each_index{|i| count += 1 if Sinatra::Base.routes["GET"][i][0].inspect.include?('user')}
+    count.should == 2
     Sinatra::Base.routes["POST"][-1][0].inspect.include?('user').should == true
     Sinatra::Base.routes["PUT"][-1][0].inspect.include?('user').should == true
     Sinatra::Base.routes["DELETE"][-1][0].inspect.include?('user').should == true
