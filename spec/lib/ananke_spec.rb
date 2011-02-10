@@ -8,6 +8,15 @@ describe 'Basic Ananke REST' do
   def app
     Sinatra::Base
   end
+
+  before(:all) do
+    Ananke.set :links, false
+  end
+
+  after(:all) do
+    Ananke.set :links, true
+  end
+
   #----------------------------SETUP--------------------------------------
   it """
   Should be able to describe a Valid REST Resource

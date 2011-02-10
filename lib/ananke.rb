@@ -16,7 +16,9 @@ module Ananke
       :output   => true,
       :info     => true,
       :warning  => true,
-      :error    => true
+      :error    => true,
+
+      :links    => true
   }
 
   #===========================OUTPUT=============================
@@ -29,8 +31,6 @@ module Ananke
         message.yellow
       when type == :error && Ananke.settings[:error]
         message.red
-      else
-        message = nil
     end
     puts message unless message.nil?
     message
@@ -42,6 +42,18 @@ module Ananke
     rep = Module.const_get(Ananke.default_repository.to_sym) if Module.const_defined?(Ananke.default_repository.to_sym)
     mod = rep.const_get("#{path.capitalize}".to_sym) if !rep.nil? && rep.const_defined?("#{path.capitalize}".to_sym)
     mod
+  end
+
+  def get_json(path, obj)
+    if obj.nil?
+      out :error, "#{path} - No return object"
+      ''
+    elsif !obj.respond_to?(:to_json)
+      out :error, "#{path} - Return object cannot be converted to JSON"
+      ''
+    else
+      obj.to_json
+    end
   end
 
   #===========================BUILDUP============================
@@ -63,56 +75,74 @@ module Ananke
     end
     key = @id[:key]
     fields = @fields
-    links = @links
+    linkups = @linkups
 
+    #===========================GET/ID=============================
     build_route mod, :one, :get, "/#{path}/:#{key}" do
       param_missing!(key) if params[key].nil?
-      ret = mod.one(params[key])
+      obj = mod.one(params[key])
+
+      json = get_json(path, obj)
+      inject_links!(json, linkups, path, params[key], mod)
 
       status 200
-      #TODO - Hyper Links(Common place maybe?)
-      ret.nil? ? nil : ret.respond_to?(:to_json) ? ret.to_json : ret
+      json
     end
 
+    #===========================GET================================
     build_route mod, :all, :get, "/#{path}/?" do
-      ret = mod.all
+      obj_list = mod.all
 
       status 200
-      #TODO - Hyper Links(Common place maybe?)
-      ret.nil? ? nil : ret.respond_to?(:to_json) ? ret.to_json : ret
+      json_list = []
+      obj_list.each do |obj|
+        id = obj.respond_to?(key) ? obj.instance_variable_get(key) : obj.class == Hash && obj.has_key?(key) ? obj[key] : nil
+        if !id.nil?
+          json = get_json(path, obj)
+          inject_links!(json, linkups, path, id, mod)
+          json_list << json
+        else
+          out :error, "#{path} - Cannot find key(#{key}) on object #{obj}"
+        end
+      end
+      "[#{json_list.join(',')}]"
     end
 
+    #===========================POST===============================
     build_route mod, :add, :post, "/#{path}/?" do
       status, message = validate(fields, params)
       error status, message unless status.nil?
+      obj = mod.add(params)
 
-      return_object = mod.add(params)
-      links = build_links(path, params[key], mod, links)
+      json = get_json(path, obj)
+      inject_links!(json, linkups, path, params[key], mod)
+
       status 201
-      inject_links(return_object, links, path, key)
+      json
     end
 
+    #===========================PUT================================
     build_route mod, :edit, :put, "/#{path}/:#{key}" do
       param_missing!(key) if params[key].nil?
       status, message = validate(fields, params)
       error status, message unless status.nil?
-      
-      ret = mod.edit(params[key], params)
+      obj = mod.edit(params[key], params)
+
+      json = get_json(path, obj)
+      inject_links!(json, linkups, path, params[key], mod)
 
       status 200
-      #TODO - Hyper Links(Common place maybe?)
-      #ret.nil? ? nil : ret.respond_to?(:to_json) ? ret.to_json : ret
+      json
     end
 
     build_route mod, :edit, :put, "/#{path}/?" do
       param_missing!(key)
     end
 
+    #===========================DELETE=============================
     build_route mod, :delete, :delete, "/#{path}/:#{key}" do
       param_missing!(key) if params[key].nil?
-
       mod.delete(params[key]) if !params[key].nil?
-      
       status 200
     end
 
@@ -140,27 +170,23 @@ module Ananke
   end
 
   #===========================LINKING============================
-  def build_links(path, id, mod, links)
-    ret = []
-    ret << {:rel => 'self', :uri => "/#{path}/#{id}"}
-    links.each do |l|
-      id_list = mod.send("get_#{l[:rel]}_#{l[:field]}_list", id)
-      id_list.each{|i| ret << {:rel => "#{l[:rel]}", :uri => "/#{l[:rel]}/#{i}"}}
+  def build_links(path, id, mod, linkups)
+    ret = [{:rel => 'self', :uri => "/#{path}/#{id}"}]
+    linkups.each do |l|
+      mod_method = "#{l[:rel]}_id_list"
+      if mod.respond_to?(mod_method)
+        id_list = mod.send(mod_method, id)
+        id_list.each{|i| ret << {:rel => "#{l[:rel]}", :uri => "/#{l[:rel]}/#{i}"}}
+      else
+        out :error, "#{path} - #{mod} does not respond to '#{mod_method.to_s}'"
+      end
     end
     ret
   end
 
-  def inject_links(obj, links, path, key)
-    if obj.nil?
-      out :error, "#{path} - No return object for add"
-      obj = {}
-    elsif !obj.respond_to?(:to_json)
-      out :error, "#{path} - Return object does cannot be converted to JSON"
-      obj = {}
-    elsif !obj.has_key?(key)
-      out :error, "#{path} - Return object does not contain key(#{key})"
-    end
-    json = obj.to_json
+  def inject_links!(json, linkups, path, id, mod)
+    return if !Ananke.settings[:links]
+    links = build_links(path, id, mod, linkups)
     json.insert(json.length-1, ",\"links\":#{links.to_json}")
   end
 
@@ -170,7 +196,7 @@ module Ananke
   def rest(path, &block)
     @id = {}
     @fields = []
-    @links = []
+    @linkups = []
     yield block
     build path
   end
@@ -184,8 +210,8 @@ module Ananke
   def optional(key, *rules)
     @fields << {:key => key, :type => :optional, :rules => rules}
   end
-  def linkup(rel, field)
-    @links << {:rel => rel, :field => field}
+  def linkup(rel)
+    @linkups << {:rel => rel}
   end
   def rule(name, &block)
     Ananke::Rules.send(:define_singleton_method, "validate_#{name}", block)
