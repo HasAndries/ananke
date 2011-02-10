@@ -39,7 +39,7 @@ end
 rest :user do
   id :user_id
 
-  linkup :computer
+  linked :computer
 end
 rest :computer do
   id :computer_id

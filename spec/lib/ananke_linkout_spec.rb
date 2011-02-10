@@ -35,7 +35,7 @@ describe 'Resource' do
   end
 
   module Repository
-    module Linkup
+    module Linkout
       def self.one(id)
         {:user_id => 1}
       end
@@ -56,20 +56,20 @@ describe 'Resource' do
       def self.one(id) end
     end
   end
-  rest :linkup do
+  rest :linkout do
     id :user_id
-    linkup :line
+    linkout :line
   end
   rest :line do
     id :line_id
   end
 
   it """
-  Should be able to Output links to linkups and Call those links
+  Should be able to Output links to linkouts and Call those links
   """ do
-    post "/linkup", body={:user_id => 1, :username => '1234'}
+    post "/linkout", body={:user_id => 1, :username => '1234'}
     check_status(201)
-    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linkup/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
+    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linkout/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
 
     hash = JSON.parse(last_response.body)
     hash['links'].each do |l|
@@ -79,29 +79,29 @@ describe 'Resource' do
   end
 
   it "Should return links on Get One" do
-    #get "/linkup/1"
-    #check_status(200)
-    #last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linkup/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
+    get "/linkout/1"
+    check_status(200)
+    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linkout/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
   end
 
   it """
   Should not inject links where it cannot find Repository Id lookup method
   """ do
     module Repository
-      module Linkup_fail
+      module Linkout_fail
         def self.one(id) end
         def self.add(data)
           {:user_id => 1}
         end
       end
     end
-    rest :linkup_fail do
+    rest :linkout_fail do
       id :user_id
-      linkup :line
+      linkout :line
     end
 
-    post "/linkup_fail", body={:user_id => 1, :username => '1234'}
+    post "/linkout_fail", body={:user_id => 1, :username => '1234'}
     check_status(201)
-    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linkup_fail/1"}]}'
+    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linkout_fail/1"}]}'
   end
 end

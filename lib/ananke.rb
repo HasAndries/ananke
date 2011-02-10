@@ -56,6 +56,10 @@ module Ananke
     end
   end
 
+  def get_id(obj, key)
+    obj.respond_to?(key) ? obj.instance_variable_get(key) : obj.class == Hash && obj.has_key?(key) ? obj[key] : nil
+  end
+
   #===========================BUILDUP============================
   def build_route(mod, mod_method, verb, route, &block)
     if mod.respond_to? mod_method
@@ -75,7 +79,9 @@ module Ananke
     end
     key = @id[:key]
     fields = @fields
-    linkups = @linkups
+    links = @links
+    link_to_list = @link_to_list
+    root_for_list = @root_for_list
 
     #===========================GET/ID=============================
     build_route mod, :one, :get, "/#{path}/:#{key}" do
@@ -83,7 +89,7 @@ module Ananke
       obj = mod.one(params[key])
 
       json = get_json(path, obj)
-      inject_links!(json, linkups, path, params[key], mod)
+      inject_links!(json, links, link_to_list, root_for_list, path, params[key], mod)
 
       status 200
       json
@@ -96,10 +102,10 @@ module Ananke
       status 200
       json_list = []
       obj_list.each do |obj|
-        id = obj.respond_to?(key) ? obj.instance_variable_get(key) : obj.class == Hash && obj.has_key?(key) ? obj[key] : nil
+        id = get_id(obj, key)
         if !id.nil?
           json = get_json(path, obj)
-          inject_links!(json, linkups, path, id, mod)
+          inject_links!(json, links, link_to_list, root_for_list, path, id, mod)
           json_list << json
         else
           out :error, "#{path} - Cannot find key(#{key}) on object #{obj}"
@@ -115,7 +121,7 @@ module Ananke
       obj = mod.add(params)
 
       json = get_json(path, obj)
-      inject_links!(json, linkups, path, params[key], mod)
+      inject_links!(json, links, link_to_list, root_for_list, path, params[key], mod)
 
       status 201
       json
@@ -129,7 +135,7 @@ module Ananke
       obj = mod.edit(params[key], params)
 
       json = get_json(path, obj)
-      inject_links!(json, linkups, path, params[key], mod)
+      inject_links!(json, links, link_to_list, root_for_list, path, params[key], mod)
 
       status 200
       json
@@ -169,34 +175,52 @@ module Ananke
     error 400, "Missing Parameter: #{key.to_s}"
   end
 
-  #===========================LINKING============================
-  def build_links(path, id, mod, linkups)
-    ret = [{:rel => 'self', :uri => "/#{path}/#{id}"}]
-    linkups.each do |l|
+  #===========================LINKS==============================
+  def inject_links!(json, links, link_to_list, root_for_list, path, id, mod)
+    return if !Ananke.settings[:links]
+
+    links = []
+    links << build_links(path, id, mod, links)
+    links << build_link_to_list(path, id, link_to_list)
+    links << build_root_for_list(path, id, root_for_list)
+
+    json.insert(json.length-1, ",\"links\":#{links.to_json}")
+  end
+  #===========================LINKOUT============================
+  def build_links(path, id, mod, links)
+    links = [{:rel => 'self', :uri => "/#{path}/#{id}"}]
+    links.each do |l|
       mod_method = "#{l[:rel]}_id_list"
       if mod.respond_to?(mod_method)
         id_list = mod.send(mod_method, id)
-        id_list.each{|i| ret << {:rel => "#{l[:rel]}", :uri => "/#{l[:rel]}/#{i}"}}
+        id_list.each{|i| links << {:rel => "#{l[:rel]}", :uri => "/#{l[:rel]}/#{i}"}}
       else
         out :error, "#{path} - #{mod} does not respond to '#{mod_method.to_s}'"
       end
     end
-    ret
+    links
   end
-
-  def inject_links!(json, linkups, path, id, mod)
-    return if !Ananke.settings[:links]
-    links = build_links(path, id, mod, linkups)
-    json.insert(json.length-1, ",\"links\":#{links.to_json}")
+  #===========================link_to===========================
+  def build_link_to_list(path, id, link_to_list)
+    links = []
+    link_to_list.each do |l|
+      links << {:rel => "#{l[:rel]}", uri => "/#{l[:rel]}/#{path}/#{id}"}
+    end
+    links
+  end
+  #===========================root_for=============================
+  def build_root_for_list(path, id, link_to_list)
+    
   end
 
   public
-
   #===========================DSL================================
   def rest(path, &block)
     @id = {}
     @fields = []
-    @linkups = []
+    @links = []
+    @link_to_list = []
+    @root_for_list = []
     yield block
     build path
   end
@@ -210,8 +234,14 @@ module Ananke
   def optional(key, *rules)
     @fields << {:key => key, :type => :optional, :rules => rules}
   end
-  def linkup(rel)
-    @linkups << {:rel => rel}
+  def linked(rel)
+    @links << {:rel => rel}
+  end
+  def link_to(rel)
+    @link_to_list << {:rel => rel}
+  end
+  def root_for(rel)
+    @root_for_list << {:rel => rel}
   end
   def rule(name, &block)
     Ananke::Rules.send(:define_singleton_method, "validate_#{name}", block)
