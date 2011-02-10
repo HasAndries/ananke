@@ -43,15 +43,40 @@ based on what's available in it's respective Repository. Routes are:
   put     '/name/id'  -> Repository::Capitalize(name).edit(id, data)
   delete  '/name/id'  -> Repository::Capitalize(name).delete(id)
 
+== Repositories
+The Default Repository can be changed:
+
+ ananke.default_repository = 'MyRepository'
+
+== HyperMedia
+Current HyperMedia support is very limited. The following example demostrates it's use:
+
+  rest :user do
+    id :id
+    linked :computer
+   end
+
+To support the above example, the Respository for User needs to have a method that returns an
+array of id's for use in the HyperMedia links. The method signature is as follows
+
+  def self.computer_id_list
+    [Return an array of single value id's]
+  end
+
+It get called:
+
+  [ResourceRepository].[link name]_id_list
+
+We are working on adding lots more HyperMedia Support, especially to get around problems that
+the current HyperMedia is giving. Stay tuned...
+
+== Media Type
 The REST media type can be built up:
 
   required :name
   optional :country
 
-== Repositories
-The Default Repository can be changed:
-
- ananke.default_repository = 'MyRepository'
+Exposing the Media Type is on the cards.
 
 == Validation
 Validation can be added on any field by providing arguments after a field declaration:
