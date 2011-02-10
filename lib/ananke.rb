@@ -100,12 +100,22 @@ module Ananke
         end
       end
 =end
-      media = linkup(path, params[key], mod, links)
-      ret = Object.new if ret.nil?
-      ret.instance_variable_set(:@links, media)
+      links = build_links(path, params[key], mod, links)
       #ret.nil? ? nil : ret.respond_to?(:to_json) ? ret.to_json : ret
       status 201
-      media.to_json
+
+      j
+      if ret.nil?
+        out :error, "#{path} - No return object for add"
+        ret = {}
+      elsif !ret.respond_to?(:to_json)
+        out :error, "#{path} - Return object does cannot be converted to JSON"
+        ret = {}
+      elsif !ret.has_key?(key)
+        out :error, "#{path} - Return object does not contain key(#{key})"
+      end
+      json = ret.to_json
+      json.insert(json.length-1, ",\"links\":#{links.to_json}")
     end
 
     build_route mod, :edit, :put, "/#{path}/:#{key}" do
@@ -156,7 +166,7 @@ module Ananke
   end
 
   #===========================LINKING============================
-  def linkup(path, id, mod, links)
+  def build_links(path, id, mod, links)
     ret = []
     ret << {:rel => 'self', :uri => "/#{path}/#{id}"}
     ret
@@ -170,7 +180,7 @@ module Ananke
     @fields = []
     @links = []
     yield block
-    media :self, :get, path, @id[:key]
+    linkup :self, :get, path, @id[:key]
     build path
   end
 
@@ -183,7 +193,7 @@ module Ananke
   def optional(key, *rules)
     @fields << {:key => key, :type => :optional, :rules => rules}
   end
-  def media(rel, method, resource, field)
+  def linkup(rel, method, resource, field)
     @links << {:rel => rel, :method => method, :resource => resource, :field => field}
   end
   def rule(name, &block)

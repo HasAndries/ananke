@@ -28,10 +28,11 @@ describe 'Resource' do
 
     post "/computer", body={:user_id => 1, :username => '1234'}
     check_status(201)
-    last_response.body.should == '[{"rel":"self","uri":"/computer/1"}]'
+    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/computer/1"}]}'
 
     hash = JSON.parse(last_response.body)
-    get hash[0]['uri']
+    uri = hash['links'].map{|l| l['uri'] if l['rel'] == 'self'}[0]
+    get uri
     check_status(200)
   end
 
