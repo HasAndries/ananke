@@ -86,36 +86,10 @@ module Ananke
       status, message = validate(fields, params)
       error status, message unless status.nil?
 
-      ret = mod.add(params)
-
-      #TODO - Hyper Links for Created Resource
-=begin
-      if !links.empty?
-        if ret.nil?
-          out :error, "#{path} - No return object for add"
-        elsif !ret.has_key?(key)
-          out :error, "#{path} - Return object does not contain key(#{key})"
-        else
-          linkup(path, params[key], mod, links)
-        end
-      end
-=end
+      return_object = mod.add(params)
       links = build_links(path, params[key], mod, links)
-      #ret.nil? ? nil : ret.respond_to?(:to_json) ? ret.to_json : ret
       status 201
-
-      j
-      if ret.nil?
-        out :error, "#{path} - No return object for add"
-        ret = {}
-      elsif !ret.respond_to?(:to_json)
-        out :error, "#{path} - Return object does cannot be converted to JSON"
-        ret = {}
-      elsif !ret.has_key?(key)
-        out :error, "#{path} - Return object does not contain key(#{key})"
-      end
-      json = ret.to_json
-      json.insert(json.length-1, ",\"links\":#{links.to_json}")
+      inject_links(return_object, links, path, key)
     end
 
     build_route mod, :edit, :put, "/#{path}/:#{key}" do
@@ -169,7 +143,25 @@ module Ananke
   def build_links(path, id, mod, links)
     ret = []
     ret << {:rel => 'self', :uri => "/#{path}/#{id}"}
+    links.each do |l|
+      id_list = mod.send("get_#{l[:rel]}_#{l[:field]}_list", id)
+      id_list.each{|i| ret << {:rel => "#{l[:rel]}", :uri => "/#{l[:rel]}/#{i}"}}
+    end
     ret
+  end
+
+  def inject_links(obj, links, path, key)
+    if obj.nil?
+      out :error, "#{path} - No return object for add"
+      obj = {}
+    elsif !obj.respond_to?(:to_json)
+      out :error, "#{path} - Return object does cannot be converted to JSON"
+      obj = {}
+    elsif !obj.has_key?(key)
+      out :error, "#{path} - Return object does not contain key(#{key})"
+    end
+    json = obj.to_json
+    json.insert(json.length-1, ",\"links\":#{links.to_json}")
   end
 
   public
@@ -180,7 +172,6 @@ module Ananke
     @fields = []
     @links = []
     yield block
-    linkup :self, :get, path, @id[:key]
     build path
   end
 
@@ -193,8 +184,8 @@ module Ananke
   def optional(key, *rules)
     @fields << {:key => key, :type => :optional, :rules => rules}
   end
-  def linkup(rel, method, resource, field)
-    @links << {:rel => rel, :method => method, :resource => resource, :field => field}
+  def linkup(rel, field)
+    @links << {:rel => rel, :field => field}
   end
   def rule(name, &block)
     Ananke::Rules.send(:define_singleton_method, "validate_#{name}", block)
