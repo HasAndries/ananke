@@ -26,7 +26,7 @@ Ananke is a DSL that extends the functionality of Sinatra for easy creation of R
 Install the gem and run with:
 
   gem install ananke
-  ruby -rubygems myapp.rb
+  ruby myapp.rb
 
 All Users
   http://localhost:4567/user
