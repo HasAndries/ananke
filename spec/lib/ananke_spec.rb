@@ -60,41 +60,41 @@ describe 'Basic Ananke REST' do
   """ do
     get "/user"
     check_status(200)
-    last_response.body.should == Repository::User.data.to_json
+    last_response.body.should == '{"user_list":[{"user":{"user_id":1,"username":"one"}},{"user":{"user_id":2,"username":"two"}}]}'
   end
 
   it """
     GET /user/1
       - code:         200
       - content-type: text/plain
-      - body:         {user_id: ,username: ,email: ,country: }
+      - body:         {user_id: ,username: }
   """ do
     get "/user/1"
     check_status(200)
-    last_response.body.should == Repository::User.data[0].to_json
+    last_response.body.should == '{"user":{"user_id":1,"username":"one"}}'
   end
 
   it """
     POST /user
-      - body:         {user_id: ,username: ,email: ,country: }
+      - body:         {user_id: ,username: }
     RETURN
       - code:         201
       - content-type: text/json
       - body:
   """ do
-    post "/user", body={:user_id => 3, :username => 'three', :email => '3@three.com', :country => 'USA'}
+    post "/user", body={:user_id => 3, :username => 'three'}
     check_status(201)
   end
 
   it """
     PUT /user/3
-      - body:         {user_id: ,username: ,email: ,country: }
+      - body:         {user_id: ,username: }
     RETURN
       - code:         200
       - content-type: text/json
       - body:
   """ do
-    put "/user/3", body={:user_id => 3, :username => 'four', :email => '4@four.com', :country => 'Russia'}
+    put "/user/3", body={:user_id => 3, :username => 'four'}
     check_status(200)
   end
 
@@ -112,13 +112,13 @@ describe 'Basic Ananke REST' do
   #----------------------------FAILS--------------------------------------
   it """
     PUT /user
-      - body:         {user_id: ,username: ,email: ,country: }
+      - body:         {user_id: ,username: }
     RETURN
       - code:         400
       - content-type: text/json
       - body:         Missing Parameter: user_id
   """ do
-    put "/user", body={:user_id => 3, :username => 'four', :email => '4@four.com', :country => 'Russia'}
+    put "/user", body={:user_id => 3, :username => 'four'}
     check_status(400)
     last_response.body.should == 'Missing Parameter: user_id'
   end
@@ -138,8 +138,8 @@ end
 
 module Repository
   module User
-    @data = [{:user_id => 1, :username => 'one', :email => '1@one.com', :country => 'South Africa'},
-             {:user_id => 2, :username => 'two', :email => '2@two.com', :country => 'England'}]
+    @data = [{:user_id => 1, :username => 'one'},
+             {:user_id => 2, :username => 'two'}]
 
     def self.data
       @data

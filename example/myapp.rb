@@ -6,7 +6,6 @@ Sinatra::Base.set :public, Proc.new { File.join(root, "../public") }
 #--------------------Repositories---------------------
 module Repository
   module User
-
     @users = [
         {:user_id => '1', :name => 'One'},
         {:user_id => '2', :name => 'Two'}]
@@ -24,6 +23,7 @@ module Repository
       @user_computers[@user_computers.index{|uc| uc[:user_id] == user_id}][:computers]
     end
   end
+
   module Computer
     @computers = [
         {:computer_id => '1', :type => 'Intel i5 750'},
@@ -34,13 +34,40 @@ module Repository
       @computers[@computers.index{ |c| c[:computer_id] == id}]
     end
   end
+
+  module Car
+    @cars = [
+        {:car_id => 1, :make => 'Toyota'},
+        {:car_id => 2, :make => 'Mazda'},
+        {:car_id => 3, :make => 'Ford'},
+        {:car_id => 4, :make => 'Fiat'}]
+    @user_cars = [
+        {:user_id => 1, :cars => [1,3]},
+        {:user_id => 2, :cars => [2,4]}]
+    
+    def self.user(id)
+      car_id_list = []
+      @user_cars.each{|i| car_id_list += i[:cars] if i[:user_id] == id.to_i }
+      car_id_list.map do |car_id|
+        @cars[@cars.index{ |c| c[:car_id] == car_id}]
+      end
+    end
+  end
 end
 #-------------------REST Resources--------------------
 rest :user do
   id :user_id
 
-  linkup :computer
+  linked :computer
+  link_to :car
 end
+
 rest :computer do
   id :computer_id
+end
+
+rest :car do
+  id :car_id
+  
+  route_for :user
 end
