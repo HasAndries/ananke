@@ -43,15 +43,117 @@ based on what's available in it's respective Repository. Routes are:
   put     '/name/id'  -> Repository::Capitalize(name).edit(id, data)
   delete  '/name/id'  -> Repository::Capitalize(name).delete(id)
 
+== Repositories
+The Default Repository can be changed:
+
+ ananke.default_repository = 'MyRepository'
+
+== HyperMedia
+=== Linked
+
+  rest :user do
+    id :id
+    linked :computer
+   end
+
+   module Repository
+    module User
+      def self.one(id)
+        [Return User for User Id]
+      end
+      def self.computer_id_list(id)
+        [Return an array of single value id's]
+      end
+    end
+   end
+
+Repository Method:
+
+  [ResourceRepository].[linked name]_id_list
+
+Routes Available/Registered:
+
+  /user/:id
+
+Output:
+
+  {
+    user: {
+            user_id: "1"
+            name: "One"
+          }
+    links:  [
+              {
+                rel: "self"
+                uri: "/user/1"
+              },
+              {
+                rel: "computer"
+                uri: "/computer/2"
+              }
+            ]
+  }
+
+The Respository for User needs to have a method that returns an array of id's for use in the HyperMedia links.
+The link to <b>Self</b> uses this method. The output will be something like this:
+
+=== Link To and Route For
+
+  rest :user do
+    id :id
+    link_to :computer
+  end
+  rest :computer do
+    id :id
+    route_for :user
+  end
+
+  module Repository
+    module User
+      def self.one(id)
+        [Return User for User Id]
+      end
+    end
+    module Computer
+      def self.user(id)
+        [Return List of Computers for User Id]
+      end
+    end
+  end
+
+Routes Available/Registered:
+
+  /user/:id
+  /computer/user/:id
+
+Output:
+
+  {
+    user: {
+            user_id: "1"
+            name: "One"
+          }
+    links:  [
+              {
+                rel: "self"
+                uri: "/user/1"
+              },
+              {
+                rel: "computer"
+                uri: "/computer/user/1"
+              }
+            ]
+  }
+
+This way of linking solves a lot of problems, and can also be used for searching support.
+
+== Media Type
 The REST media type can be built up:
 
   required :name
   optional :country
 
-== Repositories
-The Default Repository can be changed:
-
- ananke.default_repository = 'MyRepository'
+Exposing the Media Type is on the cards.
 
 == Validation
 Validation can be added on any field by providing arguments after a field declaration:
@@ -103,7 +205,6 @@ A short list of future development:
   - Refactor!
   - Return Value Strategy
   - Resource Exposes Media Type
-  - HyperMedia
   - Lots more `bullet-proofing`
   - ETag Support
 
