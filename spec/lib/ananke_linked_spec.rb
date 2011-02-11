@@ -26,7 +26,7 @@ describe 'Resource' do
 
     post "/self", body={:user_id => 1, :username => '1234'}
     check_status(201)
-    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/self/1"}]}'
+    last_response.body.should == '{"self":{"user_id":1},"links":[{"rel":"self","uri":"/self/1"}]}'
 
     hash = JSON.parse(last_response.body)
     uri = hash['links'].map{|l| l['uri'] if l['rel'] == 'self'}[0]
@@ -35,7 +35,7 @@ describe 'Resource' do
   end
 
   module Repository
-    module Linkup
+    module Linked
       def self.one(id)
         {:user_id => 1}
       end
@@ -56,20 +56,20 @@ describe 'Resource' do
       def self.one(id) end
     end
   end
-  rest :linkup do
+  rest :linked do
     id :user_id
-    linkup :line
+    linked :line
   end
   rest :line do
     id :line_id
   end
 
   it """
-  Should be able to Output links to linkups and Call those links
+  Should be able to Output links to linkeds and Call those links
   """ do
-    post "/linkup", body={:user_id => 1, :username => '1234'}
+    post "/linked", body={:user_id => 1, :username => '1234'}
     check_status(201)
-    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linkup/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
+    last_response.body.should == '{"linked":{"user_id":1},"links":[{"rel":"self","uri":"/linked/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
 
     hash = JSON.parse(last_response.body)
     hash['links'].each do |l|
@@ -79,29 +79,29 @@ describe 'Resource' do
   end
 
   it "Should return links on Get One" do
-    #get "/linkup/1"
-    #check_status(200)
-    #last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linkup/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
+    get "/linked/1"
+    check_status(200)
+    last_response.body.should == '{"linked":{"user_id":1},"links":[{"rel":"self","uri":"/linked/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
   end
 
   it """
   Should not inject links where it cannot find Repository Id lookup method
   """ do
     module Repository
-      module Linkup_fail
+      module Linked_fail
         def self.one(id) end
         def self.add(data)
           {:user_id => 1}
         end
       end
     end
-    rest :linkup_fail do
+    rest :linked_fail do
       id :user_id
-      linkup :line
+      linked :line
     end
 
-    post "/linkup_fail", body={:user_id => 1, :username => '1234'}
+    post "/linked_fail", body={:user_id => 1, :username => '1234'}
     check_status(201)
-    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linkup_fail/1"}]}'
+    last_response.body.should == '{"linked_fail":{"user_id":1},"links":[{"rel":"self","uri":"/linked_fail/1"}]}'
   end
 end
