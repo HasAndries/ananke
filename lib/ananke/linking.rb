@@ -30,7 +30,7 @@ module Ananke
   def build_link_to_list(path, id, link_to_list)
     links = []
     link_to_list.each do |l|
-      links << {:rel => "#{l[:rel]}", :uri => "/#{l[:rel]}/#{path}/#{id}"}
+      links << {:rel => "#{l[:rel]}", :uri => "/#{l[:rel]}/#{path.to_s.split('/')[0]}/#{id}"}
     end
     links
   end
