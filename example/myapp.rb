@@ -44,7 +44,7 @@ module Repository
     @user_cars = [
         {:user_id => 1, :cars => [1,3]},
         {:user_id => 2, :cars => [2,4]}]
-    
+
     def self.user(id)
       car_id_list = []
       @user_cars.each{|i| car_id_list += i[:cars] if i[:user_id] == id.to_i }
