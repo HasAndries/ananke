@@ -36,7 +36,7 @@ describe 'Basic Ananke REST' do
   it """
   Should setup the defaults for REST
   """ do
-    Ananke.default_repository.should == 'Repository'
+    Ananke.repository.should == :Repository
   end
 
   it """
