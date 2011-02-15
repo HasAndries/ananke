@@ -1,6 +1,20 @@
 module Ananke
+  public
+  class << self
+    attr_accessor :routes
+  end
+
+  private
+  @routes = {}
+  
+  def add_route(name, method)
+    Ananke.routes[name.to_sym] ||= []
+    Ananke.routes[name.to_sym] << method.to_sym
+  end
+  
   def build_route(mod, mod_method, verb, route, &block)
     if mod.respond_to? mod_method
+      add_route(route.split('/')[1], mod_method)
       Sinatra::Base.send verb, "#{route}", do
         instance_eval(&block)
       end
