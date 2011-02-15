@@ -116,9 +116,28 @@ module Ananke
 
     #===========================ROUTE_FOR==========================
     route_for_list.each do |r|
-      build_route mod, r[:name], :get, "/#{path}/#{r[:name]}/:key" do
-        param_missing!(:key) if params[:key].nil?
-        obj = mod.send(r[:name], params[:key])
+      inputs = mod.method(r[:name]).parameters
+      full_path = "/#{path}/#{r[:name]}"
+      full_path << "/:key" if inputs.length == 1
+
+      call_def = "def self.call_#{path}_#{r[:name]}(params)"
+      case inputs.length
+        when 0
+          call_def << "#{mod}.send(:#{r[:name]})"
+        when 1
+          call_def << "#{mod}.send(:#{r[:name]}, params[:key])"
+        else
+          input_array = []
+          inputs.each{|i| input_array << "params[:#{i[1]}]"}
+          call_def << "#{mod}.send(:#{r[:name]}, #{input_array.join(',')})"
+      end
+      call_def << "end"
+      puts call_def
+      Ananke.send(:eval, call_def)
+
+      build_route mod, r[:name], r[:verb], full_path do
+        param_missing!(:key) if inputs.length == 1 && params[:key].nil?
+        obj = Ananke.send("call_#{path}_#{r[:name]}", params)
 
         links = build_links(link_list, link_to_list, "#{path}/#{r[:name]}", params[:key], mod)
         json = get_json("#{path}/#{r[:name]}", obj, links)
