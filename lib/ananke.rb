@@ -1,12 +1,15 @@
+libdir = File.dirname(__FILE__)
+$LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
+
 require 'colored'
 require 'json'
 require 'sinatra/base'
 
-require './lib/ananke/helpers'
-require './lib/ananke/linking'
-require './lib/ananke/routing'
-require './lib/ananke/settings'
-require './lib/ananke/validation'
+require 'ananke/helpers'
+require 'ananke/linking'
+require 'ananke/routing'
+require 'ananke/settings'
+require 'ananke/validation'
 
 module Ananke
   private

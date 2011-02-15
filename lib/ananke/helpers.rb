@@ -15,9 +15,6 @@ module Ananke
     if obj.nil?
       out :error, "#{path} - No return object"
       ''
-    elsif !obj.respond_to?(:to_json)
-      out :error, "#{path} - Return object cannot be converted to JSON"
-      ''
     else
       root_path = path.to_s.split('/')[0]
       dic = {root_path.to_sym => obj}
