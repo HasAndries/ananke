@@ -8,7 +8,7 @@ group :development, :test do
   gem "rack-test", "~>0.5.6"
   gem "rake", "~>0.8.7"
   gem "rspec", "~>2.5.0"
-  gem 'simplecov', '~>0.3.9'
+  gem 'simplecov', '~>0.4.0'
 end
 
 

@@ -41,8 +41,8 @@ module Ananke
   def link_to(rel)
     @link_to_list << {:rel => rel}
   end
-  def route_for(rel)
-    @route_for_list << {:name => rel}
+  def route_for(rel, verb = :get)
+    @route_for_list << {:name => rel, :verb => verb}
   end
   def rule(name, &block)
     Ananke::Rules.send(:define_singleton_method, "validate_#{name}", block)
