@@ -51,6 +51,16 @@ describe 'Basic Ananke REST' do
     Sinatra::Base.routes["DELETE"][-1][0].inspect.include?('user').should == true
   end
 
+  it """
+  Should expose routes registered
+  """ do
+    Ananke.routes[:user].should include :one
+    Ananke.routes[:user].should include :all
+    Ananke.routes[:user].should include :add
+    Ananke.routes[:user].should include :edit
+    Ananke.routes[:user].should include :delete
+  end
+
   #----------------------------BASIC--------------------------------------
   it """
     GET /user

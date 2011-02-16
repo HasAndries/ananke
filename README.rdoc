@@ -101,9 +101,9 @@ The link to <b>Self</b> uses this method. The output will be something like this
 
   rest :user do
     id :id
-    link_to :computer
+    link_to :car
   end
-  rest :computer do
+  rest :car do
     id :id
     route_for :user
   end
@@ -114,9 +114,9 @@ The link to <b>Self</b> uses this method. The output will be something like this
         [Return User for User Id]
       end
     end
-    module Computer
+    module Car
       def self.user(id)
-        [Return List of Computers for User Id]
+        [Return List of Cars for User Id]
       end
     end
   end
@@ -124,7 +124,7 @@ The link to <b>Self</b> uses this method. The output will be something like this
 Routes Available/Registered:
 
   /user/:id
-  /computer/user/:id
+  /car/user/:id
 
 Output:
 
@@ -146,6 +146,22 @@ Output:
   }
 
 This way of linking solves a lot of problems, and can also be used for searching support.
+<b>route_for</b> supports an optional 2nd parameter to specify the type of request it must register for:
+
+  rest :car do
+    id :id
+    route_for :user, :post
+  end
+
+The Called Repository can also have multiple input paramaters:
+
+  def some_method(id, name, email)
+    ...
+  end
+
+will need an incoming Request with these paramaters:
+
+  id, name, email
 
 == Media Type
 The REST media type can be built up:
