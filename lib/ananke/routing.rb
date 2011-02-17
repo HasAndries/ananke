@@ -132,7 +132,6 @@ module Ananke
           call_def << "#{mod}.send(:#{r[:name]}, #{input_array.join(',')})"
       end
       call_def << "end"
-      puts call_def
       Ananke.send(:eval, call_def)
 
       build_route mod, r[:name], r[:verb], full_path do
