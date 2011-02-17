@@ -40,4 +40,8 @@ module Ananke
     puts message unless message.nil?
     message
   end
+
+  def haml(template, options={}, locals={})
+    haml(template, options, locals)
+  end
 end
