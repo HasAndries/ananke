@@ -20,7 +20,7 @@ describe 'Resource' do
         end
       end
     end
-    rest :self do
+    route :self do
       id :user_id
     end
 
@@ -56,11 +56,11 @@ describe 'Resource' do
       def self.one(id) end
     end
   end
-  rest :linked do
+  route :linked do
     id :user_id
     linked :line
   end
-  rest :line do
+  route :line do
     id :line_id
   end
 
@@ -95,7 +95,7 @@ describe 'Resource' do
         end
       end
     end
-    rest :linked_fail do
+    route :linked_fail do
       id :user_id
       linked :line
     end

@@ -19,7 +19,7 @@ Ananke is a DSL that extends the functionality of Sinatra for easy creation of R
     end
   end
   #-------------------REST Resources--------------------
-  rest :user do
+  route :user do
     id :id
   end
 
@@ -34,7 +34,7 @@ One User
   http://localhost:4567/user/1
 
 == REST Resources
-`rest` defines a complete Resource, and constructs Sinatra Routes
+`route` defines a complete Resource, and constructs Sinatra Routes
 based on what's available in it's respective Repository. Routes are:
 
   get     '/name/?'   -> Repository::Capitalize(name).all
@@ -51,7 +51,7 @@ The Default Repository can be changed:
 == HyperMedia
 === Linked
 
-  rest :user do
+  route :user do
     id :id
     linked :computer
    end
@@ -99,11 +99,11 @@ The link to <b>Self</b> uses this method. The output will be something like this
 
 === Link To and Route For
 
-  rest :user do
+  route :user do
     id :id
     link_to :car
   end
-  rest :car do
+  route :car do
     id :id
     route_for :user
   end
@@ -148,7 +148,7 @@ Output:
 This way of linking solves a lot of problems, and can also be used for searching support.
 <b>route_for</b> supports an optional 2nd parameter to specify the type of request it must register for:
 
-  rest :car do
+  route :car do
     id :id
     route_for :user, :post
   end

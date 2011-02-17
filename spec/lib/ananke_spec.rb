@@ -21,7 +21,7 @@ describe 'Basic Ananke REST' do
   it """
   Should be able to describe a Valid REST Resource
   """ do
-    rest :user do
+    route :user do
       id :user_id
     end
   end
@@ -29,7 +29,7 @@ describe 'Basic Ananke REST' do
   it """
   Should skip creating Routes for Non-Existing Repositories
   """ do
-    rest :invalid do
+    route :invalid do
     end
   end
 

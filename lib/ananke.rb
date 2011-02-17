@@ -16,7 +16,7 @@ module Ananke
 
   public
   #===========================DSL================================
-  def rest(path, &block)
+  def route(path, &block)
     @id = {}
     @fields = []
     @link_list = []
