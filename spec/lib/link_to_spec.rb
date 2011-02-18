@@ -19,7 +19,7 @@ describe 'Link-To Resource' do
         end
       end
     end
-    rest :link_to do
+    route :link_to do
       id :link_id
       link_to :to
     end
