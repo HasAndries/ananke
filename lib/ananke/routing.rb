@@ -1,3 +1,7 @@
+require './lib/ananke/validation'
+require './lib/ananke/linking'
+require './lib/ananke/helpers'
+
 module Ananke
   public
   class << self
@@ -14,6 +18,7 @@ module Ananke
   
   def build_route(mod, mod_method, verb, route, &block)
     if mod.respond_to? mod_method
+      define_repository_call(mod, mod_method)
       add_route(route.split('/')[1], mod_method)
       Sinatra::Base.send verb, "#{route}", do
         instance_eval(&block)
@@ -74,11 +79,13 @@ module Ananke
 
     #===========================POST===============================
     build_route mod, :add, :post, "/#{path}/?" do
-      status, message = validate(fields, params)
+      new_params = collect_params(params)
+      status, message = validate(fields, new_params)
       error status, message unless status.nil?
-      obj = mod.add(params)
+      
+      obj = repository_call(mod, :add, new_params)
 
-      links = build_links(link_list, link_to_list, path, params[key], mod)
+      links = build_links(link_list, link_to_list, path, new_params[key], mod)
       json = get_json(path, obj, links)
 
       status 201
@@ -87,10 +94,12 @@ module Ananke
 
     #===========================PUT================================
     build_route mod, :edit, :put, "/#{path}/:#{key}" do
-      param_missing!(key) if params[key].nil?
-      status, message = validate(fields, params)
+      new_params = collect_params(params)
+      param_missing!(key) if new_params[key].nil?
+      status, message = validate(fields, new_params)
       error status, message unless status.nil?
-      obj = mod.edit(params[key], params)
+
+      obj = repository_call(mod, :edit, new_params)
 
       links = build_links(link_list, link_to_list, path, params[key], mod)
       json = get_json(path, obj, links)
@@ -120,23 +129,11 @@ module Ananke
       full_path = "/#{path}/#{r[:name]}"
       full_path << "/:key" if inputs.length == 1
 
-      call_def = "def self.call_#{path}_#{r[:name]}(params)"
-      case inputs.length
-        when 0
-          call_def << "#{mod}.send(:#{r[:name]})"
-        when 1
-          call_def << "#{mod}.send(:#{r[:name]}, params[:key])"
-        else
-          input_array = []
-          inputs.each{|i| input_array << "params[:#{i[1]}]"}
-          call_def << "#{mod}.send(:#{r[:name]}, #{input_array.join(',')})"
-      end
-      call_def << "end"
-      Ananke.send(:eval, call_def)
-
       build_route mod, r[:name], r[:verb], full_path do
-        param_missing!(:key) if inputs.length == 1 && params[:key].nil?
-        obj = Ananke.send("call_#{path}_#{r[:name]}", params)
+        new_params = collect_params(params)
+        param_missing!(:key) if inputs.length == 1 && new_params[:key].nil?
+
+        obj = repository_call(mod, r[:name], new_params)
 
         links = build_links(link_list, link_to_list, "#{path}/#{r[:name]}", params[:key], mod)
         json = get_json("#{path}/#{r[:name]}", obj, links)
