@@ -19,7 +19,7 @@ describe 'Resource' do
         def self.add(data)end
       end
     end
-    rest :basic do
+    route :basic do
       id :user_id
       required :username, :length => 4
     end
@@ -49,7 +49,7 @@ describe 'Resource' do
         def self.add(data)end
       end
     end
-    rest :explicit do
+    route :explicit do
       id :user_id
       required :email, :email
     end
@@ -73,7 +73,7 @@ describe 'Resource' do
         def self.add(data)end
       end
     end
-    rest :added do
+    route :added do
       id :user_id
       required :country, :country
     end

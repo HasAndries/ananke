@@ -19,7 +19,7 @@ describe 'Resource Route-For' do
         end
       end
     end
-    rest :route_for do
+    route :route_for do
       id :link_id
       route_for :custom
     end
@@ -39,7 +39,7 @@ describe 'Resource Route-For' do
         end
       end
     end
-    rest :route_for do
+    route :route_for do
       id :link_id
       route_for :multi, :post
     end
