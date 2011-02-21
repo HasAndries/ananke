@@ -140,10 +140,11 @@ module Ananke
         new_params = collect_params(params)
         param_missing!(:key) if inputs.length == 1 && new_params[:key].nil?
 
-        obj = [repository_call(mod, r[:name], new_params)]
+        obj = repository_call(mod, r[:name], new_params)
+        obj_list = obj.class == Array ? obj : [obj]
 
         status 200
-        make_response(path, mod, link_list, link_to_list, obj, key).gsub("\"/#{path}/\"", request.path)
+        make_response(path, mod, link_list, link_to_list, obj_list, key).gsub("\"/#{path}/\"", request.path)
       end
     end
   end
