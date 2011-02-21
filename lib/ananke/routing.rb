@@ -1,6 +1,7 @@
-require './lib/ananke/validation'
-require './lib/ananke/linking'
-require './lib/ananke/helpers'
+require 'ananke/linking'
+require 'ananke/helpers'
+require 'ananke/serialize'
+require 'ananke/validation'
 
 module Ananke
   public

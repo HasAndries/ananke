@@ -1,3 +1,4 @@
+require 'json'
 module Ananke
 
   extend Colored
@@ -16,7 +17,7 @@ module Ananke
       out :error, "#{path} - No return object"
       ''
     else
-      require './lib/ananke/serialize'
+      require 'ananke/serialize'
 
       root_path = path.to_s.split('/')[0]
       dic = {root_path.to_sym => obj}
