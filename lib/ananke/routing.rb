@@ -52,9 +52,9 @@ module Ananke
       link_self = build_link_self(path, '') if Ananke.settings[:links]
       dic[:links] = link_self if link_self
 
-      Serialize.to_json(dic)
+      Serialize.to_j(dic)
     else
-      Serialize.to_json(make_response_item(path, mod, link_list, link_to_list, obj, key))
+      Serialize.to_j(make_response_item(path, mod, link_list, link_to_list, obj, key))
     end
   end
 
@@ -75,11 +75,8 @@ module Ananke
       param_missing!(key) if params[key].nil?
       obj = mod.one(params[key])
 
-      links = build_links(link_list, link_to_list, path, params[key], mod)
-      json = get_json(path, obj, links)
-
       status 200
-      json
+      make_response(path, mod, link_list, link_to_list, obj, key)
     end
 
     #===========================GET================================
