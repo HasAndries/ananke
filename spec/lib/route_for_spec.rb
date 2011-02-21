@@ -26,7 +26,7 @@ describe 'Resource Route-For' do
 
     get "/route_for/custom/1"
     check_status(200)
-    last_response.body.should == '{"route_for":{"content":"Test"},"links":[{"rel":"self","uri":"/route_for"}]}'
+    last_response.body.should == '{"route_for":{"content":"Test"},"links":[{"rel":"self","uri":"/route_for/custom/1"}]}'
   end
 
   it """
@@ -46,6 +46,6 @@ describe 'Resource Route-For' do
 
     post "/route_for/multi", body={:id => 1, :name => 'some name'}
     check_status(200)
-    last_response.body.should == '{"route_for":{"content":"Test"},"links":[{"rel":"self","uri":"/route_for"}]}'
+    last_response.body.should == '{"route_for":{"content":"Test"},"links":[{"rel":"self","uri":"/route_for/multi"}]}'
   end
 end
