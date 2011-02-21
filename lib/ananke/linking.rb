@@ -10,7 +10,9 @@ module Ananke
   end
   #===========================SELF===============================
   def build_link_self(path, id)
-    [{:rel => 'self', :uri => "/#{path}/#{id}"}]
+    uri = "/#{path.to_s.split('/')[0]}"
+    uri << "/#{id}" if id
+    [{:rel => 'self', :uri => uri}]#"/#{path}/#{id}"}]
   end
   #===========================LINKED=============================
   def build_link_list(path, id, mod, link_list)
