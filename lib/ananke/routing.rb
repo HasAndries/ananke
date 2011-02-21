@@ -74,7 +74,7 @@ module Ananke
       link_self = build_link_self(path, '') if Ananke.settings[:links]
       dic[:links] = link_self unless link_self.nil?
 
-      dic.to_json
+      Serialize.to_json(dic)
     end
 
     #===========================POST===============================

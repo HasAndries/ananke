@@ -17,7 +17,7 @@ module Ananke
       ''
     else
       require './lib/ananke/serialize'
-      
+
       root_path = path.to_s.split('/')[0]
       dic = {root_path.to_sym => obj}
       dic[:links] = links unless links.nil?
