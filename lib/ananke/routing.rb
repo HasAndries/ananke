@@ -141,7 +141,7 @@ module Ananke
         obj_list = obj.class == Array ? obj : [obj]
 
         status 200
-        make_response(path, mod, link_list, link_to_list, obj_list, key).gsub("\"/#{path}/\"", request.path)
+        make_response(path, mod, link_list, link_to_list, obj_list, key).gsub("\"/#{path}/\"", "\"#{request.path}\"")
       end
     end
   end
