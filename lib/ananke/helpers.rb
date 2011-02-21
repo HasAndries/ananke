@@ -27,7 +27,7 @@ module Ananke
   end
 
   def get_id(obj, key)
-    obj.respond_to?(key) ? obj.instance_variable_get(key) : obj.class == Hash && obj.has_key?(key) ? obj[key] : nil
+    obj.class == Hash && obj.has_key?(key) ? obj[key] : obj.respond_to?(key) ? obj.instance_variable_get("@#{key}") : nil
   end
 
   def out(type, message)

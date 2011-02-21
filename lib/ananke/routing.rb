@@ -136,7 +136,8 @@ module Ananke
 
         obj = repository_call(mod, r[:name], new_params)
 
-        links = build_links(link_list, link_to_list, "#{path}/#{r[:name]}", params[:key], mod)
+        id = new_params.has_key?(:key) ? new_params[:key] : get_id(obj, key)
+        links = build_links(link_list, link_to_list, "#{path}/#{r[:name]}", id, mod)
         json = get_json("#{path}/#{r[:name]}", obj, links)
 
         status 200
