@@ -29,6 +29,35 @@ module Ananke
     end
   end
 
+  def make_response_item(path, mod, link_list, link_to_list, obj, key)
+    item = nil
+    id = get_id(obj, key)
+    if !id.nil?
+      dic = {path.to_sym => obj}
+      links = build_links(link_list, link_to_list, path, id, mod) if Ananke.settings[:links]
+      dic[:links] = links if links
+      item = dic
+    else
+      out :error, "#{path} - Cannot find key(#{key}) on object #{obj}"
+    end
+    item
+  end
+
+  def make_response(path, mod, link_list, link_to_list, obj, key)
+    if obj.class == Array
+      result_list = []
+      obj.each{|i| result_list << make_response_item(path, mod, link_list, link_to_list, i, key)}
+
+      dic = {"#{path}_list".to_sym => result_list}
+      link_self = build_link_self(path, '') if Ananke.settings[:links]
+      dic[:links] = link_self if link_self
+
+      Serialize.to_json(dic)
+    else
+      Serialize.to_json(make_response_item(path, mod, link_list, link_to_list, obj, key))
+    end
+  end
+
   def build(path)
     mod = get_mod(path)
     if mod.nil?
@@ -55,27 +84,10 @@ module Ananke
 
     #===========================GET================================
     build_route mod, :all, :get, "/#{path}/?" do
-      obj_list = mod.all
+      obj = mod.all
 
       status 200
-      #json_list = []
-      result_list = []
-      obj_list.each do |obj|
-        id = get_id(obj, key)
-        if !id.nil?
-          dic = {path.to_sym => obj}
-          links = build_links(link_list, link_to_list, path, id, mod) if Ananke.settings[:links]
-          dic[:links] = links unless links.nil?
-          result_list << dic
-        else
-          out :error, "#{path} - Cannot find key(#{key}) on object #{obj}"
-        end
-      end
-      dic = {"#{path}_list".to_sym => result_list}
-      link_self = build_link_self(path, '') if Ananke.settings[:links]
-      dic[:links] = link_self unless link_self.nil?
-
-      Serialize.to_json(dic)
+      make_response(path, mod, link_list, link_to_list, obj, key)
     end
 
     #===========================POST===============================
@@ -86,11 +98,8 @@ module Ananke
       
       obj = repository_call(mod, :add, new_params)
 
-      links = build_links(link_list, link_to_list, path, new_params[key], mod)
-      json = get_json(path, obj, links)
-
       status 201
-      json
+      make_response(path, mod, link_list, link_to_list, obj, key)
     end
 
     #===========================PUT================================
@@ -101,12 +110,9 @@ module Ananke
       error status, message unless status.nil?
 
       obj = repository_call(mod, :edit, new_params)
-
-      links = build_links(link_list, link_to_list, path, params[key], mod)
-      json = get_json(path, obj, links)
-
+      
       status 200
-      json
+      make_response(path, mod, link_list, link_to_list, obj, key)
     end
 
     build_route mod, :edit, :put, "/#{path}/?" do
@@ -134,15 +140,10 @@ module Ananke
         new_params = collect_params(params)
         param_missing!(:key) if inputs.length == 1 && new_params[:key].nil?
 
-        obj = repository_call(mod, r[:name], new_params)
-
-        id = new_params.has_key?(:key) ? new_params[:key] : get_id(obj, key)
-        #id = get_id(obj, key)
-        links = build_links(link_list, link_to_list, "#{path}/#{r[:name]}", id, mod)
-        json = get_json("#{path}/#{r[:name]}", obj, links)
+        obj = [repository_call(mod, r[:name], new_params)]
 
         status 200
-        json
+        make_response(path, mod, link_list, link_to_list, obj, key).gsub("\"/#{path}/\"", request.path)
       end
     end
   end
