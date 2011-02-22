@@ -64,6 +64,10 @@ module Ananke
       out(:error, "Repository for #{path} not found")
       return
     end
+    if @id.empty?
+      out :warning, "No Id specified for #{path}"
+      return
+    end
     key = @id[:key]
     fields = @fields
     link_list = @link_list

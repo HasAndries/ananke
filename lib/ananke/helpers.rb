@@ -13,6 +13,10 @@ module Ananke
   end
 
   def get_id(obj, key)
+    if !key
+      out :error, "Cannot get id on object #{obj}, key is nil"
+      return nil
+    end
     obj.class == Hash && obj.has_key?(key) ? obj[key] : obj.respond_to?(key) ? obj.instance_variable_get("@#{key}") : nil
   end
 
