@@ -10,7 +10,7 @@ module Ananke
   def validate(fields, params)
     errors = []
     fields.each do |field|
-      value = params[field[:key].to_s]
+      value = params[field[:key]]
       errors << "Missing Required Parameter: #{field[:key]}" if field[:type] == :required && value.nil?
       Ananke::Rules.value = value
       field[:rules].each do |r|

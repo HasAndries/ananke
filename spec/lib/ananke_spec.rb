@@ -21,7 +21,7 @@ describe 'Basic Ananke REST' do
   it """
   Should be able to describe a Valid REST Resource
   """ do
-    rest :user do
+    route :user do
       id :user_id
     end
   end
@@ -29,7 +29,7 @@ describe 'Basic Ananke REST' do
   it """
   Should skip creating Routes for Non-Existing Repositories
   """ do
-    rest :invalid do
+    route :invalid do
     end
   end
 
@@ -104,7 +104,7 @@ describe 'Basic Ananke REST' do
       - content-type: text/json
       - body:
   """ do
-    put "/user/3", body={:user_id => 3, :username => 'four'}
+    put "/user/3", body={:username => 'four'}
     check_status(200)
   end
 
@@ -128,7 +128,7 @@ describe 'Basic Ananke REST' do
       - content-type: text/json
       - body:         Missing Parameter: user_id
   """ do
-    put "/user", body={:user_id => 3, :username => 'four'}
+    put "/user", body={:username => 'four'}
     check_status(400)
     last_response.body.should == 'Missing Parameter: user_id'
   end
@@ -155,22 +155,24 @@ module Repository
       @data
     end
 
-    def self.one(id)
-      @data[@data.index{ |d| d[:user_id] == id.to_i}]
+    def self.one(user_id)
+      @data[@data.index{ |d| d[:user_id] == user_id.to_i}]
     end
     def self.all
       @data
     end
-    def self.add(data)
-      @data << data
-      data
+    def self.add(user_id, username)
+      obj = {:user_id => user_id.to_i, :username => username}
+      @data << obj
+      obj
     end
-    def self.edit(id, data)
-      @data.each { |d| d = data if d[:user_id] == id}
-      data
+    def self.edit(user_id, username)
+      obj = {:user_id => user_id.to_i, :username => username}
+      @data[@data.index{|i| i[:user_id] == user_id.to_i}] = obj
+      obj
     end
-    def self.delete(id)
-      @data.delete_if { |i| i[:user_id] == id}
+    def self.delete(user_id)
+      @data.delete_if { |i| i[:user_id] == user_id.to_i}
     end
   end
 end

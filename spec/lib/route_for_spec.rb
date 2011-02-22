@@ -15,18 +15,18 @@ describe 'Resource Route-For' do
     module Repository
       module Route_for
         def self.custom(id)
-          {:content => 'Test'}
+          {:route_for_id => id, :content => 'Test'}
         end
       end
     end
-    rest :route_for do
-      id :link_id
+    route :route_for do
+      id :route_for_id
       route_for :custom
     end
 
     get "/route_for/custom/1"
     check_status(200)
-    last_response.body.should == '{"route_for":{"content":"Test"},"links":[{"rel":"self","uri":"/route_for/custom/1"}]}'
+    last_response.body.should == '{"route_for_list":[{"route_for":{"route_for_id":"1","content":"Test"},"links":[{"rel":"self","uri":"/route_for/1"}]}],"links":[{"rel":"self","uri":"/route_for/custom/1"}]}'
   end
 
   it """
@@ -35,17 +35,17 @@ describe 'Resource Route-For' do
     module Repository
       module Route_for
         def self.multi(id, name)
-          {:content => 'Test'}
+          {:route_for_id => id, :content => 'Test'}
         end
       end
     end
-    rest :route_for do
-      id :link_id
+    route :route_for do
+      id :route_for_id
       route_for :multi, :post
     end
 
     post "/route_for/multi", body={:id => 1, :name => 'some name'}
     check_status(200)
-    last_response.body.should == '{"route_for":{"content":"Test"},"links":[{"rel":"self","uri":"/route_for/multi/"}]}'
+    last_response.body.should == '{"route_for_list":[{"route_for":{"route_for_id":"1","content":"Test"},"links":[{"rel":"self","uri":"/route_for/1"}]}],"links":[{"rel":"self","uri":"/route_for/multi"}]}'
   end
 end

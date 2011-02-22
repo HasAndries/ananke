@@ -2,13 +2,13 @@ libdir = File.dirname(__FILE__)
 $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
 require 'colored'
-require 'json'
 require 'sinatra/base'
 
 require 'ananke/helpers'
 require 'ananke/linking'
 require 'ananke/routing'
 require 'ananke/settings'
+require 'ananke/serialize'
 require 'ananke/validation'
 
 module Ananke
@@ -16,7 +16,7 @@ module Ananke
 
   public
   #===========================DSL================================
-  def rest(path, &block)
+  def route(path, &block)
     @id = {}
     @fields = []
     @link_list = []

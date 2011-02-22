@@ -1,3 +1,21 @@
+0.1.1
+  Can Use JSON in POST body to pass parameters
+
+0.1.0
+  Some cleaning and updates
+
+0.0.9
+  Multiple Input param Support for route_for Repository methods
+
+0.0.8
+  Keep track of and make public Registered Routes
+
+0.0.7
+  link_to path fix
+
+0.0.6
+  Load Path Issue
+  
 0.0.5
   Load Path Issue
 
