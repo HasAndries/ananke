@@ -1,6 +1,7 @@
-require './lib/ananke/validation'
-require './lib/ananke/linking'
-require './lib/ananke/helpers'
+require 'ananke/linking'
+require 'ananke/helpers'
+require 'ananke/serialize'
+require 'ananke/validation'
 
 module Ananke
   public
@@ -74,7 +75,7 @@ module Ananke
       link_self = build_link_self(path, '') if Ananke.settings[:links]
       dic[:links] = link_self unless link_self.nil?
 
-      dic.to_json
+      Serialize.to_json(dic)
     end
 
     #===========================POST===============================
@@ -135,7 +136,9 @@ module Ananke
 
         obj = repository_call(mod, r[:name], new_params)
 
-        links = build_links(link_list, link_to_list, "#{path}/#{r[:name]}", params[:key], mod)
+        #id = new_params.has_key?(:key) ? new_params[:key] : get_id(obj, key)
+        id = get_id(obj, key)
+        links = build_links(link_list, link_to_list, "#{path}/#{r[:name]}", id, mod)
         json = get_json("#{path}/#{r[:name]}", obj, links)
 
         status 200

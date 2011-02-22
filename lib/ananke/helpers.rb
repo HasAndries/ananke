@@ -1,3 +1,4 @@
+require 'json'
 module Ananke
 
   extend Colored
@@ -16,15 +17,17 @@ module Ananke
       out :error, "#{path} - No return object"
       ''
     else
+      require 'ananke/serialize'
+
       root_path = path.to_s.split('/')[0]
       dic = {root_path.to_sym => obj}
       dic[:links] = links unless links.nil?
-      dic.to_json
+      Serialize.to_json(dic)
     end
   end
 
   def get_id(obj, key)
-    obj.respond_to?(key) ? obj.instance_variable_get(key) : obj.class == Hash && obj.has_key?(key) ? obj[key] : nil
+    obj.class == Hash && obj.has_key?(key) ? obj[key] : obj.respond_to?(key) ? obj.instance_variable_get("@#{key}") : nil
   end
 
   def out(type, message)
