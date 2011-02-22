@@ -1,3 +1,11 @@
+1.0.1
+  Always return objects, even if id not found(value types)
+  Exclude links from output if there aren't any
+
+1.0.0
+  Major Release, first relatively stable one
+  Include various fixes and changes
+
 0.1.1
   Can Use JSON in POST body to pass parameters
 
