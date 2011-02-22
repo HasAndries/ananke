@@ -12,21 +12,11 @@ module Ananke
     mod
   end
 
-  def get_json(path, obj, links)
-    if obj.nil?
-      out :error, "#{path} - No return object"
-      ''
-    else
-      require 'ananke/serialize'
-
-      root_path = path.to_s.split('/')[0]
-      dic = {root_path.to_sym => obj}
-      dic[:links] = links unless links.nil?
-      Serialize.to_json(dic)
-    end
-  end
-
   def get_id(obj, key)
+    if !key
+      out :error, "Cannot get id on object #{obj}, key is nil"
+      return nil
+    end
     obj.class == Hash && obj.has_key?(key) ? obj[key] : obj.respond_to?(key) ? obj.instance_variable_get("@#{key}") : nil
   end
 

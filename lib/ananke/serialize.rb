@@ -5,33 +5,34 @@ module Serialize
     obj.class != Array and !obj.to_json.start_with?('"#<')
   end
 
-  def self.to_hash(obj)
+  def self.to_h(obj)
     ret = {}
 
     if obj.class == Hash
       obj.each do |k, v|
-        ret[k.to_sym] = (can_serialize?(v) ? v : Serialize.to_hash(v))
+        ret[k.to_sym] = (can_serialize?(v) ? v : Serialize.to_h(v))
       end
     elsif obj.class == Array
       ret = []
       obj.each do |i|
-        ret << (can_serialize?(i) ? i : Serialize.to_hash(i))
+        #ret << (can_serialize?(i) ? i : Serialize.to_hash(i))
+        ret << Serialize.to_h(i)
       end
     else
       obj.instance_variables.each do |e|
         value = obj.instance_variable_get e.to_sym
-        ret[e[1..-1]] = (can_serialize?(value) ? value : Serialize.to_hash(value))
+        ret[e[1..-1]] = (can_serialize?(value) ? value : Serialize.to_h(value))
       end
     end
     ret
   end
 
-  def self.to_json(obj)
-    Serialize.to_hash(obj).to_json
+  def self.to_j(obj)
+    Serialize.to_h(obj).to_json
   end
 
   def self.to_json_pretty(obj)
-    JSON.pretty_generate(Serialize.to_hash(obj), opts = {:indent => '    '})
+    JSON.pretty_generate(Serialize.to_h(obj), opts = {:indent => '    '})
   end
 
 end
