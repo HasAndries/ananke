@@ -30,17 +30,12 @@ module Ananke
   end
 
   def make_response_item(path, mod, link_list, link_to_list, obj, key)
-    item = nil
     id = get_id(obj, key)
-    if !id.nil?
-      dic = {path.to_sym => obj}
-      links = build_links(link_list, link_to_list, path, id, mod) if Ananke.settings[:links]
-      dic[:links] = links if links
-      item = dic
-    else
-      out :info, "#{path} - Cannot find key(#{key}) on object #{obj}"
-    end
-    item
+    out :info, "#{path} - Cannot find key(#{key}) on object #{obj}" if !id
+    dic = {path.to_sym => obj}
+    links = build_links(link_list, link_to_list, path, id, mod) if Ananke.settings[:links]
+    dic[:links] = links if links && !links.empty?
+    dic
   end
 
   def make_response(path, mod, link_list, link_to_list, obj, key)

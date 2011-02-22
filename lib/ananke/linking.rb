@@ -2,7 +2,7 @@ module Ananke
   def build_links(link_list, link_to_list, path, id, mod)
     return if !Ananke.settings[:links]
 
-    links = build_link_self(path, id)
+    links = id ? build_link_self(path, id) : []
     links += build_link_list(path, id, mod, link_list)
     links += build_link_to_list(path, id, link_to_list)
 
