@@ -70,7 +70,9 @@ describe 'Resource' do
     end
     module Repository
       module Added
-        def self.add(data)end
+        def self.add(data)
+          nil
+        end
       end
     end
     route :added do
