@@ -30,17 +30,12 @@ module Ananke
   end
 
   def make_response_item(path, mod, link_list, link_to_list, obj, key)
-    item = nil
     id = get_id(obj, key)
-    if !id.nil?
-      dic = {path.to_sym => obj}
-      links = build_links(link_list, link_to_list, path, id, mod) if Ananke.settings[:links]
-      dic[:links] = links if links
-      item = dic
-    else
-      out :error, "#{path} - Cannot find key(#{key}) on object #{obj}"
-    end
-    item
+    out :info, "#{path} - Cannot find key(#{key}) on object #{obj}" if !id
+    dic = {path.to_sym => obj}
+    links = build_links(link_list, link_to_list, path, id, mod) if Ananke.settings[:links]
+    dic[:links] = links if links && !links.empty?
+    dic
   end
 
   def make_response(path, mod, link_list, link_to_list, obj, key)
@@ -48,7 +43,7 @@ module Ananke
       result_list = []
       obj.each{|i| result_list << make_response_item(path, mod, link_list, link_to_list, i, key)}
 
-      dic = {"#{path}_list".to_sym => result_list}
+      dic = result_list.empty? ? {} : {"#{path}_list".to_sym => result_list}
       link_self = build_link_self(path, '') if Ananke.settings[:links]
       dic[:links] = link_self if link_self
 
@@ -64,10 +59,7 @@ module Ananke
       out(:error, "Repository for #{path} not found")
       return
     end
-    if @id.empty?
-      out :warning, "No Id specified for #{path}"
-      return
-    end
+    out :info, "No Id specified for #{path}" if @id.empty?
     key = @id[:key]
     fields = @fields
     link_list = @link_list
