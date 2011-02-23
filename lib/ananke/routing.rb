@@ -41,7 +41,7 @@ module Ananke
   def make_response(path, mod, link_list, link_to_list, obj, key)
     if obj.class == Array
       result_list = []
-      obj.each{|i| result_list << make_response_item(path, mod, link_list, link_to_list, i, key)}
+      obj.each{|i| result_list << make_response_item(path, mod, link_list, link_to_list, i, key) if i}
 
       dic = result_list.empty? ? {} : {"#{path}_list".to_sym => result_list}
       link_self = build_link_self(path, '') if Ananke.settings[:links]

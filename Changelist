@@ -1,6 +1,7 @@
 1.0.4
   Exceptions do not include the method names anymore
   NotFound(404) is generated if return object is empty Array
+  Nil objects from a Repository call are not included in the response
 
 1.0.3
   Exception Handling and returning non 200 codes from Repositories
