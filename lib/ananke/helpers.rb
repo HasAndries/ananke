@@ -55,24 +55,30 @@ module Ananke
 
   def define_repository_call(mod, method_name)
     inputs = mod.method(method_name).parameters
-    repository_name = mod.name.split('::').last
-    call_def = "def self.call_#{repository_name}_#{method_name}(params)"
+    repository_name = mod.name.split('::').last.downcase
+    call_def = "def self.call_#{repository_name}_#{method_name}(params)\n"
     case inputs.length
       when 0
-        call_def << "#{mod}.send(:#{method_name})"
+        call_def << "  #{mod}.send(:#{method_name})\n"
       when 1
-        call_def << "#{mod}.send(:#{method_name}, params[:key])"
+        call_def << "  param = params[:key] ? params[:key] : params.values.first\n"
+        call_def << "  #{mod}.send(:#{method_name}, param)\n"
       else
         input_array = []
         inputs.each{|i| input_array << "params[:#{i[1]}]"}
-        call_def << "#{mod}.send(:#{method_name}, #{input_array.join(',')})"
+        call_def << "  #{mod}.send(:#{method_name}, #{input_array.join(',')})\n"
     end
     call_def << "end"
     Ananke.send(:eval, call_def)
   end
 
-  def repository_call(mod, method_name, params)
-    repository_name = mod.name.split('::').last
-    Ananke.send("call_#{repository_name}_#{method_name}", params)
+  def repository_call(mod, method_name, params = {})
+    repository_name = mod.name.split('::').last.downcase
+    begin
+      return Ananke.send("call_#{repository_name}_#{method_name}", params), 200
+    rescue StandardError => error
+      raise if !error.message.start_with?(method_name.to_s)
+      return error.message, 400
+    end
   end
 end
