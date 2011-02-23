@@ -1,3 +1,9 @@
+1.0.3
+  Exception Handling and returning non 200 codes from Repositories
+
+1.0.2
+  Get Object Id outputs warning instead of error if key not found
+  
 1.0.1
   Always return objects, even if id not found(value types)
   Exclude links from output if there aren't any

@@ -59,9 +59,7 @@ module Ananke
       out(:error, "Repository for #{path} not found")
       return
     end
-    if @id.empty?
-      out :info, "No Id specified for #{path}"
-    end
+    out :info, "No Id specified for #{path}" if @id.empty?
     key = @id[:key]
     fields = @fields
     link_list = @link_list
@@ -70,18 +68,23 @@ module Ananke
 
     #===========================GET/ID=============================
     build_route mod, :one, :get, "/#{path}/:#{key}" do
-      param_missing!(key) if params[key].nil?
-      obj = mod.one(params[key])
+      new_params = collect_params(params)
+      param_missing!(key) if new_params[key].nil?
 
-      status 200
+      obj, obj_status = repository_call(mod, :one, new_params)
+      error obj_status, obj if obj_status >= 400
+
+      status obj_status
       make_response(path, mod, link_list, link_to_list, obj, key)
     end
 
     #===========================GET================================
     build_route mod, :all, :get, "/#{path}/?" do
-      obj = mod.all
+      
+      obj, obj_status = repository_call(mod, :all)
+      error obj_status, obj if obj_status >= 400
 
-      status 200
+      status obj_status
       make_response(path, mod, link_list, link_to_list, obj, key)
     end
 
@@ -90,8 +93,9 @@ module Ananke
       new_params = collect_params(params)
       status, message = validate(fields, new_params)
       error status, message unless status.nil?
-      
-      obj = repository_call(mod, :add, new_params)
+
+      obj, obj_status = repository_call(mod, :add, new_params)
+      error obj_status, obj if obj_status >= 400
 
       status 201
       make_response(path, mod, link_list, link_to_list, obj, key)
@@ -104,9 +108,10 @@ module Ananke
       status, message = validate(fields, new_params)
       error status, message unless status.nil?
 
-      obj = repository_call(mod, :edit, new_params)
+      obj, obj_status = repository_call(mod, :edit, new_params)
+      error obj_status, obj if obj_status >= 400
       
-      status 200
+      status obj_status
       make_response(path, mod, link_list, link_to_list, obj, key)
     end
 
@@ -116,9 +121,13 @@ module Ananke
 
     #===========================DELETE=============================
     build_route mod, :delete, :delete, "/#{path}/:#{key}" do
-      param_missing!(key) if params[key].nil?
-      mod.delete(params[key]) if !params[key].nil?
-      status 200
+      new_params = collect_params(params)
+      param_missing!(key) if new_params[key].nil?
+      
+      obj, obj_status = repository_call(mod, :delete, new_params)
+      error obj_status, obj if obj_status >= 400
+
+      status obj_status
     end
 
     build_route mod, :delete, :delete, "/#{path}/?" do
@@ -135,10 +144,12 @@ module Ananke
         new_params = collect_params(params)
         param_missing!(:key) if inputs.length == 1 && new_params[:key].nil?
 
-        obj = repository_call(mod, r[:name], new_params)
+        obj, obj_status = repository_call(mod, r[:name], new_params)
+        error obj_status, obj if obj_status >= 400
+        
         obj_list = obj.class == Array ? obj : [obj]
 
-        status 200
+        status obj_status
         make_response(path, mod, link_list, link_to_list, obj_list, key).gsub("\"/#{path}/\"", "\"#{request.path}\"")
       end
     end
