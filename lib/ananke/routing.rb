@@ -73,6 +73,7 @@ module Ananke
 
       obj, obj_status = repository_call(mod, :one, new_params)
       error obj_status, obj if obj_status >= 400
+      not_found if obj && obj.class == Array && obj.empty?
 
       status obj_status
       make_response(path, mod, link_list, link_to_list, obj, key)
@@ -83,6 +84,7 @@ module Ananke
       
       obj, obj_status = repository_call(mod, :all)
       error obj_status, obj if obj_status >= 400
+      not_found if obj && obj.class == Array && obj.empty?
 
       status obj_status
       make_response(path, mod, link_list, link_to_list, obj, key)
@@ -96,6 +98,7 @@ module Ananke
 
       obj, obj_status = repository_call(mod, :add, new_params)
       error obj_status, obj if obj_status >= 400
+      not_found if obj && obj.class == Array && obj.empty?
 
       status 201
       make_response(path, mod, link_list, link_to_list, obj, key)
@@ -110,6 +113,7 @@ module Ananke
 
       obj, obj_status = repository_call(mod, :edit, new_params)
       error obj_status, obj if obj_status >= 400
+      not_found if obj && obj.class == Array && obj.empty?
       
       status obj_status
       make_response(path, mod, link_list, link_to_list, obj, key)
@@ -126,6 +130,7 @@ module Ananke
       
       obj, obj_status = repository_call(mod, :delete, new_params)
       error obj_status, obj if obj_status >= 400
+      not_found if obj && obj.class == Array && obj.empty?
 
       status obj_status
     end
@@ -146,6 +151,7 @@ module Ananke
 
         obj, obj_status = repository_call(mod, r[:name], new_params)
         error obj_status, obj if obj_status >= 400
+        not_found if obj && obj.class == Array && obj.empty?
         
         obj_list = obj.class == Array ? obj : [obj]
 

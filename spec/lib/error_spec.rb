@@ -45,4 +45,29 @@ describe 'Resource Route-For' do
     get "/errors/exception500/1"
     check_status(500)
   end
+
+  it """
+  should return a code 404 for an empty Array object returned
+  """ do
+    module Repository
+      module Errors
+        def self.one(id)
+          []
+        end
+        def self.empty(id)
+          []
+        end
+      end
+    end
+    route :errors do
+      id :id
+      route_for :empty
+    end
+
+    get "/errors/empty/1"
+    check_status(404)
+
+    get "/errors/1"
+    check_status(404)
+  end
 end
