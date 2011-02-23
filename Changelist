@@ -1,3 +1,6 @@
+1.0.4
+  Exceptions do not include the method names anymore
+
 1.0.3
   Exception Handling and returning non 200 codes from Repositories
 

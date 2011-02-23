@@ -25,7 +25,7 @@ describe 'Resource Route-For' do
 
     get "/errors/exception400/1"
     check_status(400)
-    last_response.body.should == 'exception400 - Some Exception'
+    last_response.body.should == 'Some Exception'
   end
 
   it """

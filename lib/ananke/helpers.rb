@@ -78,7 +78,8 @@ module Ananke
       return Ananke.send("call_#{repository_name}_#{method_name}", params), 200
     rescue StandardError => error
       raise if !error.message.start_with?(method_name.to_s)
-      return error.message, 400
+      message = error.message.split(method_name.to_s).last.split('-').last.split(':').last.strip
+      return message, 400
     end
   end
 end
