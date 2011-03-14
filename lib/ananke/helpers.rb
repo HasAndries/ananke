@@ -5,11 +5,11 @@ module Ananke
 
   public
 
-  def get_mod(path)
-    mod = nil
-    rep = Module.const_get(Ananke.repository) if Module.const_defined?(Ananke.repository)
-    mod = rep.const_get("#{path.capitalize}".to_sym) if !rep.nil? && rep.const_defined?("#{path.capitalize}".to_sym)
-    mod
+  def get_repository_module(path)
+    repository = nil
+    repository = Module.const_get(Ananke.repository) if Module.const_defined?(Ananke.repository)
+    repository = repository.const_get("#{path.capitalize}".to_sym) if !repository.nil? && repository.const_defined?("#{path.capitalize}".to_sym)
+    repository
   end
 
   def get_id(obj, key)
