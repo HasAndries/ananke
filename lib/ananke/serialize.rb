@@ -18,6 +18,8 @@ module Serialize
         #ret << (can_serialize?(i) ? i : Serialize.to_hash(i))
         ret << Serialize.to_h(i)
       end
+    elsif obj.instance_variables.empty?
+      ret = obj
     else
       obj.instance_variables.each do |e|
         value = obj.instance_variable_get e.to_sym
@@ -31,7 +33,7 @@ module Serialize
     Serialize.to_h(obj).to_json
   end
 
-  def self.to_json_pretty(obj)
+  def self.to_j_pretty(obj)
     JSON.pretty_generate(Serialize.to_h(obj), opts = {:indent => '    '})
   end
 
