@@ -1,3 +1,7 @@
+1.0.5
+  Added Serialization Support for primitives
+  Changed all return object root names from {route}_list to items
+
 1.0.4
   Exceptions do not include the method names anymore
   NotFound(404) is generated if return object is empty Array
