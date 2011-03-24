@@ -26,7 +26,7 @@ describe 'Resource' do
 
     post "/self", body={:user_id => 1, :username => '1234'}
     check_status(201)
-    last_response.body.should == '{"self":{"user_id":1},"links":[{"rel":"self","uri":"/self/1"}]}'
+    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/self/1"}]}'
 
     hash = JSON.parse(last_response.body)
     uri = hash['links'].map{|l| l['uri'] if l['rel'] == 'self'}[0]
@@ -69,7 +69,7 @@ describe 'Resource' do
   """ do
     post "/linked", body={:user_id => 1, :username => '1234'}
     check_status(201)
-    last_response.body.should == '{"linked":{"user_id":1},"links":[{"rel":"self","uri":"/linked/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
+    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linked/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
 
     hash = JSON.parse(last_response.body)
     hash['links'].each do |l|
@@ -81,7 +81,7 @@ describe 'Resource' do
   it "Should return links on Get One" do
     get "/linked/1"
     check_status(200)
-    last_response.body.should == '{"linked":{"user_id":1},"links":[{"rel":"self","uri":"/linked/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
+    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linked/1"},{"rel":"line","uri":"/line/1"},{"rel":"line","uri":"/line/2"}]}'
   end
 
   it """
@@ -102,6 +102,6 @@ describe 'Resource' do
 
     post "/linked_fail", body={:user_id => 1, :username => '1234'}
     check_status(201)
-    last_response.body.should == '{"linked_fail":{"user_id":1},"links":[{"rel":"self","uri":"/linked_fail/1"}]}'
+    last_response.body.should == '{"user_id":1,"links":[{"rel":"self","uri":"/linked_fail/1"}]}'
   end
 end

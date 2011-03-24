@@ -1,3 +1,8 @@
+1.0.6
+  Removed the object type identifier(e.g. user:{user_obj} now is {user_obj})
+  Moved Object links into the object
+  Removed Return JSON Links to original request url
+
 1.0.5
   Added Serialization Support for primitives
   Changed all return object root names from {route}_list to items

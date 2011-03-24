@@ -33,7 +33,8 @@ module Ananke
   def make_response_item(path, mod, link_list, link_to_list, obj, key)
     id = get_id(obj, key)
     out :info, "#{path} - Cannot find key(#{key}) on object #{obj}" if !id
-    dic = {path.to_sym => obj}
+    #dic = {path.to_sym => obj}
+    dic = Serialize.to_h(obj)
     links = build_links(link_list, link_to_list, path, id, mod) if Ananke.settings[:links]
     dic[:links] = links if links && !links.empty?
     dic
@@ -45,8 +46,8 @@ module Ananke
 
       #dic = result_list.empty? ? {} : {"#{path}_list".to_sym => result_list}
       dic = result_list.empty? ? {} : {"items".to_sym => result_list}
-      link_self = build_link_self(path, '') if Ananke.settings[:links]
-      dic[:links] = link_self if link_self
+      #link_self = build_link_self(path, '') if Ananke.settings[:links]
+      #dic[:links] = link_self if link_self
 
       Serialize.to_j(dic)
     else
