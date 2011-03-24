@@ -70,7 +70,7 @@ describe 'Basic Ananke REST' do
   """ do
     get "/user"
     check_status(200)
-    last_response.body.should == '{"user_list":[{"user":{"user_id":1,"username":"one"}},{"user":{"user_id":2,"username":"two"}}]}'
+    last_response.body.should == '{"items":[{"user":{"user_id":1,"username":"one"}},{"user":{"user_id":2,"username":"two"}}]}'
   end
 
   it """

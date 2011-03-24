@@ -43,7 +43,8 @@ module Ananke
     if obj.class == Array
       result_list = obj.collect{|item| make_response_item(path, mod, link_list, link_to_list, item, key) if item}.compact
 
-      dic = result_list.empty? ? {} : {"#{path}_list".to_sym => result_list}
+      #dic = result_list.empty? ? {} : {"#{path}_list".to_sym => result_list}
+      dic = result_list.empty? ? {} : {"items".to_sym => result_list}
       link_self = build_link_self(path, '') if Ananke.settings[:links]
       dic[:links] = link_self if link_self
 

@@ -2,19 +2,19 @@
 
 Gem::Specification.new do |s|
   s.name = %q{ananke}
-  s.version = "0.1.1"
+  s.version = "1.0.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Andries Coetzee"]
-  s.date = %q{2011-02-18}
+  s.date = %q{2011-03-22}
   s.description = %q{Full REST Implementation on top of Sinatra}
   s.email = %q{andriesc@mixtel.com}
   s.extra_rdoc_files = ["README.rdoc"]
-  s.files = ["lib/ananke.rb", "lib/version.rb", "lib/ananke/settings.rb", "lib/ananke/linking.rb", "lib/ananke/routing.rb", "lib/ananke/validation.rb", "lib/ananke/helpers.rb", "spec/dumping.rb", "spec/cov_adapter.rb", "spec/lib/ananke_spec.rb", "spec/lib/validation_spec.rb", "spec/lib/out_spec.rb", "spec/lib/json_spec.rb", "spec/lib/link_to_spec.rb", "spec/lib/route_for_spec.rb", "spec/lib/linked_spec.rb", "spec/spec_helper.rb", "spec/call_chain.rb", "spec/nice_formatter.rb", "Gemfile", "Rakefile", "README.rdoc"]
+  s.files = ["lib/ananke.rb", "lib/version.rb", "lib/ananke/settings.rb", "lib/ananke/linking.rb", "lib/ananke/routing.rb", "lib/ananke/validation.rb", "lib/ananke/helpers.rb", "lib/ananke/serialize.rb", "spec/dumping.rb", "spec/cov_adapter.rb", "spec/lib/ananke_spec.rb", "spec/lib/validation_spec.rb", "spec/lib/out_spec.rb", "spec/lib/json_spec.rb", "spec/lib/link_to_spec.rb", "spec/lib/route_for_spec.rb", "spec/lib/error_spec.rb", "spec/lib/linked_spec.rb", "spec/spec_helper.rb", "spec/call_chain.rb", "spec/nice_formatter.rb", "Gemfile", "Rakefile", "README.rdoc"]
   s.homepage = %q{https://github.com/HasAndries/ananke}
   s.post_install_message = %q{**************************************************
 
-  Thank you for installing ananke-0.1.1
+  Thank you for installing ananke-1.0.4
 
   Please be sure to look at README.rdoc to see what might have changed
   since the last release and how to use this GEM.
@@ -24,8 +24,8 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.5.0}
-  s.summary = %q{ananke-0.1.1}
-  s.test_files = ["spec/dumping.rb", "spec/cov_adapter.rb", "spec/lib/ananke_spec.rb", "spec/lib/validation_spec.rb", "spec/lib/out_spec.rb", "spec/lib/json_spec.rb", "spec/lib/link_to_spec.rb", "spec/lib/route_for_spec.rb", "spec/lib/linked_spec.rb", "spec/spec_helper.rb", "spec/call_chain.rb", "spec/nice_formatter.rb"]
+  s.summary = %q{ananke-1.0.4}
+  s.test_files = ["spec/dumping.rb", "spec/cov_adapter.rb", "spec/lib/ananke_spec.rb", "spec/lib/validation_spec.rb", "spec/lib/out_spec.rb", "spec/lib/json_spec.rb", "spec/lib/link_to_spec.rb", "spec/lib/route_for_spec.rb", "spec/lib/error_spec.rb", "spec/lib/linked_spec.rb", "spec/spec_helper.rb", "spec/call_chain.rb", "spec/nice_formatter.rb"]
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
