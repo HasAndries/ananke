@@ -26,6 +26,6 @@ describe 'Link-To Resource' do
 
     get "/link_to/1"
     check_status(200)
-    last_response.body.should == '{"link_to":{"link_id":"1"},"links":[{"rel":"self","uri":"/link_to/1"},{"rel":"to","uri":"/to/link_to/1"}]}'
+    last_response.body.should == '{"link_id":"1","links":[{"rel":"self","uri":"/link_to/1"},{"rel":"to","uri":"/to/link_to/1"}]}'
   end
 end
