@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{ananke}
-  s.version = "1.0.7"
+  s.version = "1.0.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Andries Coetzee"]
@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{https://github.com/HasAndries/ananke}
   s.post_install_message = %q{**************************************************
 
-  Thank you for installing ananke-1.0.7
+  Thank you for installing ananke-1.0.8
 
   Please be sure to look at README.rdoc to see what might have changed
   since the last release and how to use this GEM.
@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.5.0}
-  s.summary = %q{ananke-1.0.7}
+  s.summary = %q{ananke-1.0.8}
   s.test_files = ["spec/dumping.rb", "spec/cov_adapter.rb", "spec/lib/ananke_spec.rb", "spec/lib/validation_spec.rb", "spec/lib/out_spec.rb", "spec/lib/json_spec.rb", "spec/lib/link_to_spec.rb", "spec/lib/route_for_spec.rb", "spec/lib/error_spec.rb", "spec/lib/linked_spec.rb", "spec/spec_helper.rb", "spec/call_chain.rb", "spec/nice_formatter.rb"]
 
   if s.respond_to? :specification_version then
