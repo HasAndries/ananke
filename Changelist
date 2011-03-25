@@ -1,3 +1,6 @@
+1.0.8
+  Fixed Serialization
+
 1.0.7
   Added setting to allow removal of empty values from return objects(remove_empty)
 
