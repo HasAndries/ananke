@@ -12,7 +12,7 @@ module Ananke
       :error        => true,
 
       :links        => true,
-      :remove_empty => true,
+      :remove_empty => false,
       :repository   => 'Repository'
   }
 
