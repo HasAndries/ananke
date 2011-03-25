@@ -6,14 +6,14 @@ module Ananke
   private
 
   @settings = {
-      :output   => true,
-      :info     => true,
-      :warning  => true,
-      :error    => true,
+      :output       => true,
+      :info         => true,
+      :warning      => true,
+      :error        => true,
 
-      :links    => true,
-
-      :repository => 'Repository'
+      :links        => true,
+      :remove_empty => true,
+      :repository   => 'Repository'
   }
 
   public
