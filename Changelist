@@ -1,3 +1,6 @@
+1.0.9
+  Added removing of empty Hashes and Arrays in return objects
+
 1.0.8
   Fixed Serialization
 
