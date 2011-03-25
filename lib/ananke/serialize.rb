@@ -28,6 +28,10 @@ module Serialize
     end
     if ret.class == Hash and Ananke.settings[:remove_empty]
       ret.delete_if {|k,v| v.nil? || v == ''}
+      ret = nil if ret.empty?
+    elsif ret.class == Array and Ananke.settings[:remove_empty]
+      ret.delete_if {|i| i.nil? || i == ''}
+      ret = nil if ret.empty?
     end
     ret
   end
