@@ -10,27 +10,24 @@ module Serialize
 
     if obj.class == Hash
       obj.each do |k, v|
-        if !v.nil? and v != ''
-          ret[k.to_sym] = (can_serialize?(v) ? v : Serialize.to_h(v))
-        end
+        ret[k.to_sym] = (can_serialize?(v) ? v : Serialize.to_h(v))
       end
     elsif obj.class == Array
       ret = []
       obj.each do |i|
-        if !i.nil? and i != ''
-          #ret << (can_serialize?(i) ? i : Serialize.to_hash(i))
-          ret << Serialize.to_h(i)
-        end
+        #ret << (can_serialize?(i) ? i : Serialize.to_hash(i))
+        ret << Serialize.to_h(i)
       end
     elsif obj.instance_variables.empty?
       ret = obj
     else
       obj.instance_variables.each do |e|
         value = obj.instance_variable_get e.to_sym
-        if !value.nil? and value != ''
-          ret[e[1..-1]] = (can_serialize?(value) ? value : Serialize.to_h(value))
-        end
+        ret[e[1..-1]] = (can_serialize?(value) ? value : Serialize.to_h(value))
       end
+    end
+    if ret.class == Hash and Ananke.settings[:remove_empty]
+      ret.delete_if {|k,v| v.nil? || v == ''}
     end
     ret
   end
