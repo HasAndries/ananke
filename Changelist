@@ -1,3 +1,6 @@
+1.0.7
+  Added setting to allow removal of empty values from return objects(remove_empty)
+
 1.0.6
   Removed the object type identifier(e.g. user:{user_obj} now is {user_obj})
   Moved Object links into the object
