@@ -1,8 +1,14 @@
 require 'json'
+require 'ananke/utf8'
 module Serialize
 
   def self.can_serialize?(obj)
     obj.class != Array and obj.instance_variables.empty?#!obj.to_json.start_with?('"#<')
+  end
+
+  def self.unaccent(obj)
+    "IõÓnãÕißÍizëÕiøî"
+    obj.class == String ? obj.utf8_trans_unaccent : obj
   end
 
   def self.to_h(obj)
@@ -10,7 +16,7 @@ module Serialize
 
     if obj.class == Hash
       obj.each do |k, v|
-        ret[k.to_sym] = (can_serialize?(v) ? v : Serialize.to_h(v))
+        ret[k.to_sym] = (can_serialize?(v) ? unaccent(v) : Serialize.to_h(v))
       end
     elsif obj.class == Array
       ret = []
@@ -19,11 +25,11 @@ module Serialize
         ret << Serialize.to_h(i)
       end
     elsif obj.instance_variables.empty?
-      ret = obj
+      ret = unaccent(obj)
     else
       obj.instance_variables.each do |e|
         value = obj.instance_variable_get e.to_sym
-        ret[e[1..-1]] = (can_serialize?(value) ? value : Serialize.to_h(value))
+        ret[e[1..-1]] = (can_serialize?(value) ? unaccent(value) : Serialize.to_h(value))
       end
     end
     if ret.class == Hash and Ananke.settings[:remove_empty]
