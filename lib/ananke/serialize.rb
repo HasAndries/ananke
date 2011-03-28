@@ -1,5 +1,4 @@
 require 'json'
-require 'ananke/utf8'
 module Serialize
 
   def self.can_serialize?(obj)
@@ -7,7 +6,9 @@ module Serialize
   end
 
   def self.unaccent(obj)
-    obj.class == String ? obj.utf8_trans_unaccent : obj
+    #obj.class == String ? obj.force_encoding(Encoding::UTF_8) : obj
+    #puts obj.encoding.name if obj.class == String
+    obj
   end
 
   def self.to_h(obj)
