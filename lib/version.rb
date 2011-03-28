@@ -1,3 +1,3 @@
 module Ananke
-  VERSION = "1.0.9"
+  VERSION = "1.0.0"
 end

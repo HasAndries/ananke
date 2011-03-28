@@ -2,7 +2,7 @@ require 'json'
 module Serialize
 
   def self.can_serialize?(obj)
-    obj.class != Array and !obj.to_json.start_with?('"#<')
+    obj.class != Array and obj.instance_variables.empty?#!obj.to_json.start_with?('"#<')
   end
 
   def self.to_h(obj)
