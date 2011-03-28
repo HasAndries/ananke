@@ -7,7 +7,6 @@ module Serialize
   end
 
   def self.unaccent(obj)
-    "IõÓnãÕißÍizëÕiøî"
     obj.class == String ? obj.utf8_trans_unaccent : obj
   end
 
