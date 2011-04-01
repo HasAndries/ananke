@@ -1,5 +1,5 @@
 #myapp.rb
-require './lib/ananke'
+require_relative '../lib/ananke'
 
 #------------------------DATA----------------------------
 $DATA = {
@@ -18,7 +18,7 @@ $DATA = {
 class User
   def cars(user_id)
     user = $DATA[:users][user_id]
-    return [] if !user
+    Ananke::Base.error!(404, 'User not found') if !user
 
     user[:cars].collect do |car_id|
       $DATA[:cars][car_id]

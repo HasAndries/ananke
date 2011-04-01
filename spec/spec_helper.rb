@@ -1,3 +1,4 @@
+$LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), ".."))
 #=========================CODE COVERAGE========================
 require 'simplecov'
 SimpleCov.start do
@@ -21,7 +22,7 @@ require 'rack/test'
 
 extend Colored
 
-require './spec/fixtures'
+require 'spec/fixtures'
 
 #==================SETUP TEST ENVIRONMENT======================
 ENV['RACK_ENV'] = 'test'
@@ -32,8 +33,6 @@ ENV['RACK_ENV'] = 'test'
 #Ananke.set :error, true
 #Ananke.set :remove_empty, false
 
-$LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), ".."))
-
 #==================RACK TEST===================================
 include Rack::Test::Methods
 def app
@@ -41,5 +40,5 @@ def app
 end
 
 #==================FOR DUMPING HTTP REQUESTS===================
-require './spec/dumping'
+require 'spec/dumping'
 clear_dump

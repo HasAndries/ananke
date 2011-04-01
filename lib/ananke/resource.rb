@@ -1,4 +1,3 @@
-
 module Ananke
   class Resource
     attr_accessor :resource_name, :calls

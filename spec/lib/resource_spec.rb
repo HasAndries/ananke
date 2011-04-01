@@ -1,6 +1,6 @@
-require './spec/spec_helper'
-require './spec/lib/test_resource'
-require './lib/ananke/resource'
+require_relative '../spec_helper'
+require 'spec/lib/test_resource'
+require 'lib/ananke/resource'
 
 include Ananke
 

@@ -1,11 +1,23 @@
 require 'rack/request'
 require 'rack/mock'
-require './lib/ananke/base'
-require './lib/ananke/resource'
-require './spec/spec_helper'
-require './spec/lib/test_resource'
+
+require_relative '../spec_helper'
+require 'lib/ananke/base'
+require 'lib/ananke/resource'
+require 'spec/lib/test_resource'
 
 include Ananke
+
+describe Ananke::Base, "#reset!" do
+
+  it "should reset resources" do
+    Base.add_resource Resource.new :resource_name => :test
+    Base.resources.empty?.should == false
+    Base.reset!
+    Base.resources.empty?.should == true
+  end
+
+end
 
 describe Ananke::Base, "#add_resource" do
 
@@ -61,7 +73,7 @@ describe Ananke::Base, "#route!" do
 
   it "should raise error for an invalid input request" do
     request = Rack::Request.new Rack::MockRequest.env_for("/some_invalid_call")
-    lambda {Base.route!(request)}.should raise_error(MissingRouteError)
+    lambda {Base.route!(request)}.should raise_error(AnankeError)
   end
 
   it "should do a call with parameters available in the request" do
@@ -85,18 +97,7 @@ describe Ananke::Base, "#route!" do
     Base.add_resource resource
 
     request = Rack::Request.new Rack::MockRequest.env_for("/test/post_params?q1=1&q2=2", :method => "POST")
-    lambda{ Base.route!(request) }.should raise_error(MissingParameterError)
-  end
-
-end
-
-describe Ananke::Base, "#reset!" do
-
-  it "should reset resources" do
-    Base.add_resource Resource.new :resource_name => :test
-    Base.resources.empty?.should == false
-    Base.reset!
-    Base.resources.empty?.should == true
+    lambda{ Base.route!(request) }.should raise_error(AnankeError)
   end
 
 end

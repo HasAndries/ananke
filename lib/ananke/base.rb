@@ -1,13 +1,15 @@
 require 'colored'
 require 'rack'
-require_relative 'resource'
-require_relative 'errors'
+
 require_relative 'helpers'
-require_relative 'serialize'
+require_relative 'resource'
 
 module Ananke
   extend Colored
-  
+
+  class AnankeError < StandardError
+  end
+
   class Base
     include Rack::Utils
     attr_accessor :app
@@ -26,55 +28,65 @@ module Ananke
       begin
         result = Base.route! @request
 
-        if result.respond_to?(:has_key?)
-          @response.status = result[:body] if result.has_key? :body
-          @response['Content-Type'] = result[:content_type] if result.has_key? :content_type
-          @response.body = result[:body] if result.has_key? :body
-        else
-          @response['Content-Type'] = 'json'
-          @response.body = result
+        status = 200
+        header = {'Content-Type' => 'json'}
+        body = []
+
+        if result.respond_to?(:has_key?) and result.has_key? :body and result.has_key? :content_type and result.has_key? :body
+          status = result[:body]
+          header['Content-Type'] = result[:content_type]
+          body = [result[:body]]
+        elsif @env['REQUEST_METHOD'] != 'HEAD'
+          body = [result]
         end
 
-        status, header, @response = @response.finish
-        body = [Serialize.to_j(@response.body)]
-
-        if @env['REQUEST_METHOD'] == 'HEAD'
-          body = []
-          header.delete('Content-Length') if header['Content-Length'] == '0'
-        end
-
-      rescue MissingParameterError => e
-        status, header, body = 400, {'Content-Type' => 'html'}, [html(e.message)]
-      rescue MissingRouteError => e
-        status, header, body = 404, {'Content-Type' => 'html'}, [html(e.message)]
+        body = [Serialize.to_j(body[0])] if body.length > 0
+        header['Content-Length'] = body[0].length.to_s unless body.empty? or body[0].length == 0
+        
+      rescue AnankeError => e
+        status, header, body = format_error e.message[0], e.message[1]
       rescue StandardError => e
-        status, header, body = 500, {'Content-Type' => 'html'}, [html(e.message, '', e.backtrace)]
+        log "#{e.message}\n#{e.backtrace}", :red
+        status, header, body = format_error 500, e.message, e.backtrace
       end
 
-      out = "#{status} - #{request.request_method} #{request.url}"
-      case
-      when (200..299).include?(status)
-        puts out.green.bold
-      when (300..399).include?(status)
-        puts out.yellow.bold
-      when (400..499).include?(status)
-        puts out.magenta.bold
-      when (500..599).include?(status)
-        puts "#{out}, #{e.message}".red.bold
-      else
-        puts "#{out}".red.bold
-      end
+      log_request status, @request
 
       [status, header, body]
     end
 
-    def html(*parts)
-      ret =  "<html>\n"
-      ret << "  <head></head>\n"
-      ret << "  <body>\n"
-      ret << parts.join("<br>\n")
-      ret << "  </body>\n"
-      ret << "</html>"
+    private
+
+    def format_error(status, message, backtrace = nil)
+      body  = "<html><head></head><body>"
+      body << "<h1>#{status}</h1><h2>#{message}</h2>"
+      body << "<h2>Trace</h2>\n<br>#{backtrace.join("<br>\n")}</body></html>" if backtrace
+      body << "</body></html>"
+      [status, {'Content-Type' => 'html', 'Content-Length' => "#{body.length}"}, [body]]
+    end
+
+    def log_request(status, request)
+      out = "#{status} - #{request.request_method} #{request.url}"
+      case
+      when (200..299).include?(status)
+        log out, :green, true
+      when (300..399).include?(status)
+        log out, :yellow, true
+      when (400..499).include?(status)
+        log out, :magenta, true
+      when (500..599).include?(status)
+        log out, :red, true
+      else
+        log out, :red, true
+      end
+    end
+
+    def log(obj, color, bold = false)
+      message = obj.class == String ? obj : obj.to_s
+      message = message.send color
+      message = message.bold if bold
+      puts message
+      message
     end
 
     class << self
@@ -94,12 +106,26 @@ module Ananke
         path = path.empty? ? "/" : path
 
         call = routes[path]
-        raise MissingRouteError, "#{request.request_method} #{request.url} not found" unless call && call[:type] == request.request_method.downcase.to_sym
+        error!(404, "Resource Not found") unless call && call[:type] == request.request_method.downcase.to_sym
+        #raise NotFoundError, "Not found" unless call && call[:type] == request.request_method.downcase.to_sym
 
-        params = request.params.to_sym
-        obj = call[:class].new
-        method_params = obj.method(call[:method]).parameters.collect {|p| p[1]}
-        input_params = method_params.collect do |method_param|
+        instance = call[:class].new
+        input_params = collect_input_params instance.method(call[:method]), request.params.to_sym
+
+        #Need to do Param validation here
+        input_params.each do |param|
+          
+        end
+        
+        instance.send(call[:method], *input_params)
+      end
+
+      def collect_input_params(method, params)
+        method_params = method.parameters.collect {|p| p[1]}
+
+        method_params.collect do |method_param|
+          error!(400, "Missing parameter - #{method_param}") unless params.has_key? method_param
+          #raise ParameterError, "Missing parameter - #{method_param}" unless params.has_key? method_param
           value = params[method_param]
           case
             when value.to_i.to_s == value
@@ -110,13 +136,10 @@ module Ananke
               value
           end
         end
+      end
 
-        #Need to do Param validation here
-        input_params.each do |param|
-          raise MissingParameterError, "#{request.request_method} #{request.url} requires parameters: #{method_params.join(', ')}" unless param
-        end
-        
-        obj.send(call[:method], *input_params)
+      def error!(status = 500, message = 'Internal Error')
+        raise AnankeError, [status, message]
       end
 
       def reset!
