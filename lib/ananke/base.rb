@@ -107,7 +107,6 @@ module Ananke
 
         call = routes[path]
         error!(404, "Resource Not found") unless call && call[:type] == request.request_method.downcase.to_sym
-        #raise NotFoundError, "Not found" unless call && call[:type] == request.request_method.downcase.to_sym
 
         instance = call[:class].new
         input_params = collect_input_params instance.method(call[:method]), request.params.to_sym
@@ -125,7 +124,6 @@ module Ananke
 
         method_params.collect do |method_param|
           error!(400, "Missing parameter - #{method_param}") unless params.has_key? method_param
-          #raise ParameterError, "Missing parameter - #{method_param}" unless params.has_key? method_param
           value = params[method_param]
           case
             when value.to_i.to_s == value
@@ -152,6 +150,7 @@ module Ananke
     end
 
   end
+
 end
 
 Ananke::Base.reset!

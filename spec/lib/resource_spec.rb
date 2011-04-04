@@ -2,20 +2,18 @@ require_relative '../spec_helper'
 require 'spec/lib/test_resource'
 require 'lib/ananke/resource'
 
-include Ananke
-
-describe Resource, "#initialize" do
+describe Ananke::Resource, "#initialize" do
   it "should create a basic Resource" do
-    r = Resource.new :resource_name => :test
+    r = Ananke::Resource.new :resource_name => :test
     
     r.resource_name.should == :test
     r.calls.empty?.should == true
   end
 end
 
-describe Resource, "#add_call" do
+describe Ananke::Resource, "#add_call" do
   it "should add a basic call to a Resource" do
-    r = Resource.new :resource_name => :test
+    r = Ananke::Resource.new :resource_name => :test
 
     r.add_call :class => Test,
                 :method => :get_basic
@@ -28,7 +26,7 @@ describe Resource, "#add_call" do
   end
   
   it "should add a basic call to a Resource with a specific Http Call Type" do
-    r = Resource.new :resource_name => :test
+    r = Ananke::Resource.new :resource_name => :test
 
     r.add_call :class => Test,
                 :method => :post_basic,
@@ -38,7 +36,7 @@ describe Resource, "#add_call" do
   end
 
   it "should be able to use the method in a call" do
-    r = Resource.new :resource_name => :test
+    r = Ananke::Resource.new :resource_name => :test
 
     r.add_call :class => Test,
                 :method => :get_basic
@@ -47,3 +45,17 @@ describe Resource, "#add_call" do
   end
 
 end
+
+#describe Ananke::Resource, "#link_self" do
+#
+#  it "should provide a relative link to the resource" do
+#    r = Ananke::Resource.new :resource_name => :test
+#
+#    r.add_call :class => Test,
+#                :method => :get_basic
+#
+#    r.link_self.should == "/test/"
+#
+#  end
+#
+#end

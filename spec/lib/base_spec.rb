@@ -3,7 +3,6 @@ require 'rack/mock'
 
 require_relative '../spec_helper'
 require 'lib/ananke/base'
-require 'lib/ananke/resource'
 require 'spec/lib/test_resource'
 
 include Ananke

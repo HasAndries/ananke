@@ -1,4 +1,5 @@
 require_relative 'ananke/base'
+require_relative 'ananke/dsl'
 require_relative 'ananke/main'
 
 module Ananke
