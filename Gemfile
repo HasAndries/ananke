@@ -8,7 +8,7 @@ gem "rack", "~>1.2.2"
   gem "rack-test", "~>0.5.7"
   gem "rake", "~>0.8.7"
   gem "rspec", "~>2.5.0"
-  gem 'simplecov', '~>0.4.0'
+  gem 'simplecov', '~>0.4.2'
 #end
 
 
