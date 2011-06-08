@@ -22,23 +22,8 @@ require 'rack/test'
 
 extend Colored
 
-require 'spec/fixtures'
-
 #==================SETUP TEST ENVIRONMENT======================
 ENV['RACK_ENV'] = 'test'
 
-#Ananke.set :output, true
-#Ananke.set :info, false
-#Ananke.set :warning, false
-#Ananke.set :error, true
-#Ananke.set :remove_empty, false
-
 #==================RACK TEST===================================
 include Rack::Test::Methods
-def app
-  Sinatra::Base
-end
-
-#==================FOR DUMPING HTTP REQUESTS===================
-require 'spec/dumping'
-clear_dump

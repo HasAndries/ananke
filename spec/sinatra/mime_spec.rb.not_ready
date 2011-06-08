@@ -1,0 +1,47 @@
+require 'rack/request'
+require 'rack/mock'
+
+require_relative '../spec_helper'
+require 'lib/sinatra/ananke'
+
+resource :mimer, :link_self => false, :mime => {
+  :id => :int,
+  :name => :string
+}
+
+describe Sinatra::Ananke, '#resource' do
+  before(:all) {Sinatra::Base.reset!}
+
+  it "should define a new Sinatra Base Class and setup a Resource with the specified mime structure" do
+    Mimer.respond_to?(:new).should == true
+    Mimer.resource_name.should == :mimer
+    Mimer.resource_link_self?.should == false
+    Mimer.resource_mime.should == {
+        :id => :int,
+        :name => :string
+    }
+  end
+
+  it "should validate mime structure on GET requests provided with less data" do
+    class Mimer
+      get!(:mime_get_less) { |id| {:id => id}}
+    end
+
+    env = Rack::MockRequest.env_for("/mimer/mime_get_less/1")
+    status, header, body = Mimer.new.call(env)
+    status.should == 200
+    body[0].should == '{"items":[{"id":1,"name":""}]}'
+  end
+
+  it "should validate mime structure on GET requests provided with more data" do
+    class Mimer
+      get!(:mime_get_more) { |id| {:id => id, :name => 'test', :surname => 'test'}}
+    end
+
+    env = Rack::MockRequest.env_for("/mimer/mime_get_more/1")
+    status, header, body = Mimer.new.call(env)
+    status.should == 200
+    body[0].should == '{"items":[{"id":1,"name":"test"}]}'
+  end
+
+end
