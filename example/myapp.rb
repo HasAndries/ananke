@@ -23,7 +23,8 @@ module MyRepository
     end
     
     def self.get_by_cart(cart_id)
-      $DATA[:items].select{|i| $DATA[:carts][cart_id][:items].include?(i[:item_id])}
+      cart = $DATA[:carts].select{|i| i[:cart_id] == cart_id}.first
+      $DATA[:items].select{|i| cart[:items].include?(i[:item_id])} if cart
     end
   end
 
