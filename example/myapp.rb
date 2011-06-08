@@ -1,52 +1,84 @@
 #myapp.rb
-require './lib/ananke'
-#-----------This is only for Demo purposes------------
-require 'sinatra/main'
-Sinatra::Base.set :public, Proc.new { File.join(root, "../public") }
-#-----------------------Data--------------------------
-$USERS = [
-    {:user_id => 1, :name => 'One'},
-    {:user_id => 2, :name => 'Two'}]
-$CARS = [
-    {:car_id => 1, :make => 'Toyota'},
-    {:car_id => 2, :make => 'Mazda'},
-    {:car_id => 3, :make => 'Ford'},
-    {:car_id => 4, :make => 'Fiat'}]
-$USER_CARS = [
-    {:user_id => 1, :cars => [1,3]},
-    {:user_id => 2, :cars => [2,4]}]
-#--------------------Repositories---------------------
-module Repository
-  module User
-    def self.all
-      $USERS
+require 'sinatra/base'
+require_relative '../lib/sinatra/ananke'
+
+#------------------------Some Data-----------------------
+$DATA = {
+    :carts => [
+        {:cart_id => 1, :user_id => 1, :username => 'User1', :items => [1,2]},
+        {:cart_id => 2, :user_id => 2, :username => 'User2', :items => [3]}
+    ],
+    :items => [
+        {:item_id => 1,:name => 'B&H Special Mild 20', :price => 35.00, :discount => 0.1},
+        {:item_id => 2,:name => 'Marlboro Light 10',   :price => 32.00, :country => 'usa'},
+        {:item_id => 3,:name => 'Camel Filter 30',     :price => 40.00}
+    ]
+}
+#------------------------Repository Stuffs---------------
+module MyRepository
+  
+  class ItemStuff
+    def self.get_single(id)
+      $DATA[:items].select{|i| i[:item_id] == id}.first
     end
-    def self.one(user_id)
-      $USERS[$USERS.index{ |u| u[:user_id] == user_id.to_i}]
-    end
-    def self.car_id_list(user_id)
-      $USER_CARS[$USER_CARS.index{|uc| uc[:user_id] == user_id.to_i}][:cars]
+    
+    def self.get_by_cart(cart_id)
+      $DATA[:items].select{|i| $DATA[:carts][cart_id][:items].include?(i[:item_id])}
     end
   end
 
-  module Car
-    def self.user(id)
-      car_id_list = []
-      $USER_CARS.each{|i| car_id_list += i[:cars] if i[:user_id] == id.to_i }
-      car_id_list.map do |car_id|
-        $CARS[$CARS.index{ |c| c[:car_id] == car_id}]
-      end
+  class CartStuff
+    def self.get_single(id)
+      $DATA[:carts].select{|i| i[:cart_id] == id}.first
+    end
+
+    def self.get_all
+      $DATA[:carts]
     end
   end
 end
-#-------------------REST Resources--------------------
-route :user do
-  id :user_id
-  linked :car
-  link_to :car
+
+#------------------------Definition----------------------
+resource :cart, :id => :cart_id, :link_to => [:item] do
+
+  all do
+    MyRepository::CartStuff.get_all
+  end
+
+  one do |cart_id|
+    cart = MyRepository::CartStuff.get_single cart_id
+    error 404, "Cart not found" unless cart
+    cart
+  end
+
 end
 
-route :car do
-  id :car_id
-  route_for :user
+resource :item, :id => :item_id do
+
+  one do |item_id|
+    item = MyRepository::ItemStuff.get_single item_id
+    error 404, "Item not found" unless item
+    item
+  end
+
+  get! :cart do |cart_id|
+    items = MyRepository::ItemStuff.get_by_cart cart_id
+    error 404, "No Items in Cart" unless items
+    items
+  end
+
 end
+
+#------------------------Just to boot up app-------------
+class Main < Sinatra::Base
+  use Cart
+  use Item
+
+  run!
+end
+
+#------------------------Some Example URI's--------------
+#localhost:4567/cart
+#localhost:4567/cart/1
+#localhost:4567/item/1
+#localhost:4567/item/cart/1

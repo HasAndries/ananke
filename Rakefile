@@ -3,17 +3,19 @@ require "rake"
 require "rake/rdoctask"
 require 'rake/gempackagetask'
 require "rspec/core/rake_task"
+require "./lib/sinatra/ananke"
+require "./lib/sinatra/version"
 
-require File.expand_path("../lib/version", __FILE__)
+require File.expand_path("../lib/sinatra/version", __FILE__)
 gemspec = Gem::Specification.new do |gem|
-  gem.name        = "ananke"
+  gem.name        = "sinatra-rest"
   gem.version     = Ananke::VERSION
   gem.platform    = Gem::Platform::RUBY
   gem.authors     = ["Andries Coetzee"]
   gem.email       = "andriesc@mixtel.com"
   gem.summary     = "#{gem.name}-#{Ananke::VERSION}"
   gem.description = "Full REST Implementation on top of Sinatra"
-  gem.homepage    = "https://github.com/HasAndries/ananke"
+  gem.homepage    = "https://github.com/HasAndries/MiXREST"
 
   gem.rubygems_version   = "1.5.0"
 
@@ -32,17 +34,17 @@ gemspec = Gem::Specification.new do |gem|
 
 **************************************************
 }
-  gem.add_dependency              "sinatra",   "~> 1.1.2"
   gem.add_dependency              "colored",   "~> 1.2"
   gem.add_dependency              "json",      "~> 1.5.1"
+  gem.add_dependency              "sinatra",   "~> 1.2.1"
 
-  gem.add_development_dependency  "rack-test", "~> 0.5.6"
+  gem.add_development_dependency  "rack-test", "~> 0.5.7"
   gem.add_development_dependency  "rake",      "~> 0.8.7"
   gem.add_development_dependency  "rspec",     "~> 2.5.0"
-  gem.add_development_dependency  "simplecov", "~> 0.3.9"
+  gem.add_development_dependency  "simplecov", "~> 0.4.2"
 end
- 
-Rake::GemPackageTask.new(gemspec) do |pkg| 
+
+Rake::GemPackageTask.new(gemspec) do |pkg|
   pkg.need_tar = true
 end
 
@@ -52,14 +54,23 @@ task :gemspec do
   File.open("#{gemspec.name}.gemspec", 'w'){|f| f.write gemspec.to_ruby }
 end
 
-RSpec::Core::RakeTask.new(:test) do |t|
-  t.rspec_opts = ["-c", "-f progress", "-r ./spec/spec_helper.rb"]
-  t.pattern = 'spec/**/*_spec.rb'
+#===========================RAKE TASKS=========================
+def make_task(name, docs = false, path = 'spec')
+  options = ["-c", "-r ./spec/spec_helper.rb"]
+  options << "-f progress" if !docs
+  options << "-f NiceFormatter" << "-o results/test_results.htm" << "-r ./spec/nice_formatter.rb" if docs
+  pattern = path.end_with?('.rb') ? path : "#{path}/**/*_spec.rb"
+
+  RSpec::Core::RakeTask.new(name) do |t|
+    t.rspec_opts = options
+    t.pattern = pattern
+  end
 end
 
-RSpec::Core::RakeTask.new(:doc) do |t|
-  t.rspec_opts = ["-c" "-r ./spec/nice_formatter.rb", "-f NiceFormatter", "-o doc.htm"]
-  t.pattern = 'spec/**/*_spec.rb'
-end
+make_task(:test)
+make_task(:rest,        false,  'spec/sinatra/rest_spec.rb')
+make_task(:dsl,         false,  'spec/sinatra/dsl_spec.rb')
+make_task(:mime,        false,  'spec/sinatra/mime_spec.rb.not_ready')
+make_task(:doc,         true)
 
 task :default => [:test]
