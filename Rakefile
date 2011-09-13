@@ -10,7 +10,7 @@ task :build do
 end
 
 task :release => :build do
-  system "gem push ananke-#{Ananke::VERSION}"
+  system "gem push ananke-#{Ananke::VERSION}.gem"
 end
 
 #Testing tasks
