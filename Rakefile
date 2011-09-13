@@ -4,7 +4,7 @@ require "rspec/core/rake_task"
 
 #Building Gem and publishing
 $LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
-require "bundler/version"
+require "sinatra/version"
 task :build do
   system "gem build ananke.gemspec"
 end
