@@ -70,18 +70,20 @@ module Sinatra
       app.helpers Ananke::Helpers
     end
 
-    attr_reader :resource_name, :resource_id, :resource_link_to, :resource_classes, :resource_mime, :resource_remove_empty
+    attr_reader :resource_name, :resource_id, :resource_items, :resource_link_to, :resource_classes, :resource_mime, :resource_remove_empty
     def resource_link_self?() @resource_link_self end
 
     def make_resource(name, options = {})
       reset!
       options[:id]        ||= :id
+      options[:items]     ||= :items
       options[:link_self]   = options.has_key?(:link_self) ? options[:link_self] : true
       options[:link_to]   ||= []
       options[:classes]   ||= []
 
       @resource_name      = name
       @resource_id        = options[:id]
+      @resource_items     = options[:items]
       @resource_link_self = options[:link_self]
       @resource_link_to   = options[:link_to]
       @resource_classes   ||= []
@@ -121,6 +123,7 @@ module Sinatra
       res = {
           :name => resource_name,
           :id => resource_id,
+          :items => resource_items,
           :link_self => resource_link_self?,
           :link_to => resource_link_to,
           :classes => resource_classes,
@@ -134,10 +137,10 @@ module Sinatra
 
         result = instance_exec(*input_params, &block)
         result = Serialize.to_a(result, :remove_empty => res[:remove_empty])
-        result = result.empty? && {} || {:items => Serialize.to_h(result, :remove_empty => res[:remove_empty])}
+        result = result.empty? && {} || {res[:items] => Serialize.to_h(result, :remove_empty => res[:remove_empty])}
 
         #inject links
-        result[:items].each do |item|
+        result[res[:items]].each do |item|
           next unless item.respond_to?(:has_key?) && item.has_key?(res[:id])
           links = []
           links << {:rel => :self, :href => "/#{res[:name]}/#{item[res[:id]]}"} if res[:link_self]

@@ -110,6 +110,16 @@ describe Sinatra::Ananke, "#get!" do
     body[0].should == '{"items":[{"name":"Lucky","surname":"Luke"}]}'
   end
 
+  it "should be able to specify the root items name" do
+    class Test; make_resource :test, :items => :item_list end
+    class Test; get!(:items){ {:one => 1} } end
+
+    env = Rack::MockRequest.env_for("/test/items")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+    body[0].should == '{"item_list":[{"one":1}]}'
+  end
+
   it "should be able to use Helper functions" do
     class Test; get!(:not_found) {error 404} end
 
