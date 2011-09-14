@@ -79,22 +79,40 @@ describe Sinatra::Ananke, "#get!" do
   it "should register a valid get route and validate required parameters" do
     class Test; get!(:some_id){|key, some| key.should == 1} end
 
-    env = Rack::MockRequest.env_for("/test/some_id/1?some=test")
+    env = Rack::MockRequest.env_for("/test/some_id?key=1&some=test")
     status, header, body = Test.new.call(env)
     status.should == 200
 
-    env = Rack::MockRequest.env_for("/test/some_id/1")
+    env = Rack::MockRequest.env_for("/test/some_id?key=1")
     status, header, body = Test.new.call(env)
     status.should == 400
   end
 
-  it "should return a hash as a json string" do
+  it "should return a hash as a json hash" do
     class Test; get!(:hash){ {:one => 1} } end
 
     env = Rack::MockRequest.env_for("/test/hash")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"items":[{"one":1}]}'
+    body[0].should == '{"one":1}'
+  end
+
+  it "should return an array as a json array" do
+    class Test; get!(:array){ [1] } end
+
+    env = Rack::MockRequest.env_for("/test/array")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+    body[0].should == '[1]'
+  end
+
+  it "should return a value as a json array" do
+    class Test; get!(:single){ 1 } end
+
+    env = Rack::MockRequest.env_for("/test/single")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+    body[0].should == '[1]'
   end
 
   it "should return a complex object as a json string" do
@@ -107,17 +125,20 @@ describe Sinatra::Ananke, "#get!" do
     env = Rack::MockRequest.env_for("/test/complex")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"items":[{"name":"Lucky","surname":"Luke"}]}'
+    body[0].should == '{"name":"Lucky","surname":"Luke"}'
   end
 
-  it "should be able to specify the root items name" do
-    class Test; make_resource :test, :items => :item_list end
-    class Test; get!(:items){ {:one => 1} } end
+  it "should return an array complex objects as a json string even if only 1 element" do
+    class ComplexClass
+      attr_accessor :name, :surname
+      def initialize(name, surname) @name,@surname=name,surname end
+    end
+    class Test; get!(:complex1){ [ComplexClass.new('Lucky', 'Luke')] } end
 
-    env = Rack::MockRequest.env_for("/test/items")
+    env = Rack::MockRequest.env_for("/test/complex1")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"item_list":[{"one":1}]}'
+    body[0].should == '[{"name":"Lucky","surname":"Luke"}]'
   end
 
   it "should be able to use Helper functions" do
@@ -186,7 +207,7 @@ describe Sinatra::Ananke, '#Linking' do
     env = Rack::MockRequest.env_for("/test/link_self")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"items":[{"key":1,"name":"Lucky","links":[{"rel":"self","href":"/test/1"}]}]}'
+    body[0].should == '{"key":1,"name":"Lucky","links":[{"rel":"self","href":"/test/1"}]}'
   end
 
   it "should set the resource to link to another resource" do
@@ -200,7 +221,7 @@ describe Sinatra::Ananke, '#Linking' do
     env = Rack::MockRequest.env_for("/test/link_to")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"items":[{"key":1,"name":"Lucky","links":[{"rel":"to","href":"/to/test/1"}]}]}'
+    body[0].should == '{"key":1,"name":"Lucky","links":[{"rel":"to","href":"/to/test/1"}]}'
   end
 
 end
@@ -213,7 +234,7 @@ describe Sinatra::Ananke, "#one" do
     env = Rack::MockRequest.env_for("/test/1.0")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"items":[true]}'
+    body[0].should == '[true]'
   end
 
 end
@@ -226,7 +247,7 @@ describe Sinatra::Ananke, "#all" do
     env = Rack::MockRequest.env_for("/test")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"items":["emptyness"]}'
+    body[0].should == '["emptyness"]'
   end
 
 end
@@ -239,7 +260,7 @@ describe Sinatra::Ananke, "#add" do
     env = Rack::MockRequest.env_for("/test?name=Lucky", "REQUEST_METHOD" => "POST")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"items":[true]}'
+    body[0].should == '[true]'
   end
 
 end
@@ -252,7 +273,7 @@ describe Sinatra::Ananke, "#edit" do
     env = Rack::MockRequest.env_for("/test/1?name=Lucky", "REQUEST_METHOD" => "PUT")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"items":[true]}'
+    body[0].should == '[true]'
   end
 
 end
@@ -265,7 +286,7 @@ describe Sinatra::Ananke, "#trash" do
     env = Rack::MockRequest.env_for("/test/1", "REQUEST_METHOD" => "DELETE")
     status, header, body = Test.new.call(env)
     #status.should == 200
-    body[0].should == '{"items":[true]}'
+    body[0].should == '[true]'
   end
 
 end
@@ -278,7 +299,7 @@ describe Sinatra::Ananke, "#add" do
     env = Rack::MockRequest.env_for("/test", "REQUEST_METHOD" => "POST", :input => "name=Lucky")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"items":[true]}'
+    body[0].should == '[true]'
   end
 
 end

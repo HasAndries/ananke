@@ -70,20 +70,18 @@ module Sinatra
       app.helpers Ananke::Helpers
     end
 
-    attr_reader :resource_name, :resource_id, :resource_items, :resource_link_to, :resource_classes, :resource_mime, :resource_remove_empty
+    attr_reader :resource_name, :resource_id, :resource_link_to, :resource_classes, :resource_mime, :resource_remove_empty
     def resource_link_self?() @resource_link_self end
 
     def make_resource(name, options = {})
       reset!
       options[:id]        ||= :id
-      options[:items]     ||= :items
       options[:link_self]   = options.has_key?(:link_self) ? options[:link_self] : true
       options[:link_to]   ||= []
       options[:classes]   ||= []
 
       @resource_name      = name
       @resource_id        = options[:id]
-      @resource_items     = options[:items]
       @resource_link_self = options[:link_self]
       @resource_link_to   = options[:link_to]
       @resource_classes   ||= []
@@ -123,24 +121,23 @@ module Sinatra
       res = {
           :name => resource_name,
           :id => resource_id,
-          :items => resource_items,
           :link_self => resource_link_self?,
           :link_to => resource_link_to,
           :classes => resource_classes,
           :remove_empty => resource_remove_empty
       }
       block_params = block.parameters.collect {|p| p[1]}
-      path = "#{path}/:#{block_params[0]}" if [:get,:put,:delete].include?(type) && block_params.length >= 1 && path != ":#{block_params[0]}"
+      path = "#{path}/:#{block_params[0]}" if [:get,:put,:delete].include?(type) && block_params.length == 1 && path != ":#{block_params[0]}"
       method(type).call "/#{resource_name}/#{path}", options, do
         inject_app(res[:classes])
         input_params = collect_input_params(params, &block)
 
         result = instance_exec(*input_params, &block)
-        result = Serialize.to_a(result, :remove_empty => res[:remove_empty])
-        result = result.empty? && {} || {res[:items] => Serialize.to_h(result, :remove_empty => res[:remove_empty])}
+        result = Serialize.to_h(result, :remove_empty => res[:remove_empty])
+        result = [result] unless result.respond_to? :each
 
         #inject links
-        result[res[:items]].each do |item|
+        (result.class == Array && result || [result]).each do |item|
           next unless item.respond_to?(:has_key?) && item.has_key?(res[:id])
           links = []
           links << {:rel => :self, :href => "/#{res[:name]}/#{item[res[:id]]}"} if res[:link_self]
