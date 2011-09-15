@@ -79,11 +79,11 @@ describe Sinatra::Ananke, "#get!" do
   it "should register a valid get route and validate required parameters" do
     class Test; get!(:some_id){|key, some| key.should == 1} end
 
-    env = Rack::MockRequest.env_for("/test/some_id?key=1&some=test")
+    env = Rack::MockRequest.env_for("/test/some_id/1?some=test")
     status, header, body = Test.new.call(env)
     status.should == 200
 
-    env = Rack::MockRequest.env_for("/test/some_id?key=1")
+    env = Rack::MockRequest.env_for("/test/some_id/1")
     status, header, body = Test.new.call(env)
     status.should == 400
   end

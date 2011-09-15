@@ -127,7 +127,7 @@ module Sinatra
           :remove_empty => resource_remove_empty
       }
       block_params = block.parameters.collect {|p| p[1]}
-      path = "#{path}/:#{block_params[0]}" if [:get,:put,:delete].include?(type) && block_params.length == 1 && path != ":#{block_params[0]}"
+      path = "#{path}/:#{block_params[0]}" if [:get,:put,:delete].include?(type) && block_params.length >= 1 && path != ":#{block_params[0]}"
       method(type).call "/#{resource_name}/#{path}", options, do
         inject_app(res[:classes])
         input_params = collect_input_params(params, &block)
