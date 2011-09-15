@@ -24,7 +24,7 @@ describe Sinatra::Ananke, '#resource' do
     env = Rack::MockRequest.env_for("/basic/normal/1")
     status, header, body = Basic.new.call(env)
     status.should == 200
-    body[0].should == '{"items":[true]}'
+    body[0].should == '[true]'
   end
 
   it "should be able to define a one_resource" do
@@ -34,7 +34,7 @@ describe Sinatra::Ananke, '#resource' do
     env = Rack::MockRequest.env_for("/basic/1")
     status, header, body = Basic.new.call(env)
     status.should == 200
-    body[0].should == '{"items":[true]}'
+    body[0].should == '[true]'
   end
 
   it "should be able to define a all_resource" do
@@ -44,7 +44,7 @@ describe Sinatra::Ananke, '#resource' do
     env = Rack::MockRequest.env_for("/basic")
     status, header, body = Basic.new.call(env)
     status.should == 200
-    body[0].should == '{"items":[1,2]}'
+    body[0].should == '[1,2]'
   end
 
   it "should be able to define an add_resource" do
@@ -84,7 +84,7 @@ describe Sinatra::Ananke, '#resource' do
     env = Rack::MockRequest.env_for("/oldman")
     status, header, body = Some::Oldman.new.call(env)
     status.should == 200
-    body[0].should == '{"items":["some data"]}'
+    body[0].should == '["some data"]'
   end
 
   it "should define a resource within a specified module using a symbol" do

@@ -127,17 +127,17 @@ module Sinatra
           :remove_empty => resource_remove_empty
       }
       block_params = block.parameters.collect {|p| p[1]}
-      path = "#{path}/:#{block_params[0]}" if [:get,:put,:delete].include?(type) && block_params.length >= 1 && path != ":#{block_params[0]}"
+      path = "#{path}/:#{block_params[0]}" if [:get,:put,:delete].include?(type) && block_params.length == 1 && path != ":#{block_params[0]}"
       method(type).call "/#{resource_name}/#{path}", options, do
         inject_app(res[:classes])
         input_params = collect_input_params(params, &block)
 
         result = instance_exec(*input_params, &block)
-        result = Serialize.to_a(result, :remove_empty => res[:remove_empty])
-        result = result.empty? && {} || {:items => Serialize.to_h(result, :remove_empty => res[:remove_empty])}
+        result = Serialize.to_h(result, :remove_empty => res[:remove_empty])
+        result = [result] unless result.respond_to? :each
 
         #inject links
-        result[:items].each do |item|
+        (result.class == Array && result || [result]).each do |item|
           next unless item.respond_to?(:has_key?) && item.has_key?(res[:id])
           links = []
           links << {:rel => :self, :href => "/#{res[:name]}/#{item[res[:id]]}"} if res[:link_self]
