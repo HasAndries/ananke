@@ -76,16 +76,68 @@ describe Sinatra::Ananke, "#get!" do
     Test.routes["GET"].last[0].should match '/test/some'
   end
 
-  it "should register a valid get route and validate required parameters" do
-    class Test; get!(:some_id){|key, some| key.should == 1} end
+  it "should route {resource}/{path}/{input1} when a route has 1 input" do
+    class Test; get!(:input1) {|i1| i1.should == 1} end
 
-    env = Rack::MockRequest.env_for("/test/some_id/1?some=test")
+    env = Rack::MockRequest.env_for("/test/input1/1")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+  end
+
+  it "should route {resource}/{path}?{input1}={}&{input2}={} when a route has 2 inputs" do
+    class Test; get!(:input2) {|i1,i2| i1.should == 1;i2.should == 2} end
+
+    env = Rack::MockRequest.env_for("/test/input2?i1=1&i2=2")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+  end
+
+  it "should route {resource}/{path}/{input1} when a route has 2 inputs with an id specified " do
+    class Test; get!(:input2id,:id => :i1) {|i1,i2| i1.should == 1;i2.should == 2} end
+
+    env = Rack::MockRequest.env_for("/test/input2id/1?i2=2")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+  end
+
+  it "should register a valid get route and validate required parameters" do
+    class Test; get!(:required){|key, some| key.should == 1} end
+
+    env = Rack::MockRequest.env_for("/test/required?key=1&some=test")
     status, header, body = Test.new.call(env)
     status.should == 200
 
-    env = Rack::MockRequest.env_for("/test/some_id/1")
+    env = Rack::MockRequest.env_for("/test/required?key=1")
     status, header, body = Test.new.call(env)
     status.should == 400
+  end
+
+  it "should register a valid get route and not validate optional parameters" do
+    class Test; get!(:optional, :optional => [:key,:some]){|key, some| } end
+
+    env = Rack::MockRequest.env_for("/test/optional?key=1&some=test")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+
+    env = Rack::MockRequest.env_for("/test/optional?key=1")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+
+    env = Rack::MockRequest.env_for("/test/optional")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+  end
+
+  it "should register a valid get route and validate required and optional parameters" do
+    class Test; get!(:required_optional, :optional => [:some]){|key, some| key.should == 1} end
+
+    env = Rack::MockRequest.env_for("/test/required_optional?key=1&some=test")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+
+    env = Rack::MockRequest.env_for("/test/required_optional?key=1")
+    status, header, body = Test.new.call(env)
+    status.should == 200
   end
 
   it "should return a hash as a json hash" do
@@ -147,14 +199,6 @@ describe Sinatra::Ananke, "#get!" do
     env = Rack::MockRequest.env_for("/test/not_found")
     status, header, body = Test.new.call(env)
     status.should == 404
-  end
-
-  it "should modify the route to format {resource}/{path}/{input1} when a route only has 1 input parameter" do
-    class Test; get!(:reformat) {|some_input| some_input.should == 1} end
-
-    env = Rack::MockRequest.env_for("/test/reformat/1")
-    status, header, body = Test.new.call(env)
-    status.should == 200
   end
 
 end

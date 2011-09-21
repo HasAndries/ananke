@@ -39,12 +39,13 @@ module Sinatra
     end
     
     module Helpers
-      def collect_input_params(params, &block)
+      def collect_input_params(params, optional = [], &block)
         block_params = block.parameters.collect {|p| p[1]}
         block_params.collect do |param|
-          error(400, "Missing parameter - #{param}") unless params.has_key? param.to_s
+          error(400, "Missing parameter - #{param}") if !params.has_key?(param.to_s) && !optional.include?(param)
           value = params[param]
           case
+            when value.nil?; value
             when value.to_i.to_s == value; value.to_i
             when value.to_f.to_s == value; value.to_f
             else value
@@ -126,11 +127,15 @@ module Sinatra
           :classes => resource_classes,
           :remove_empty => resource_remove_empty
       }
+      id_param = options.delete(:id)
+      optional = options.delete(:optional) || []
       block_params = block.parameters.collect {|p| p[1]}
-      path = "#{path}/:#{block_params[0]}" if [:get,:put,:delete].include?(type) && block_params.length >= 1 && path != ":#{block_params[0]}"
+      if [:get,:put,:delete].include?(type)
+        path = "#{path}/:#{block_params[0]}" if (block_params.length == 1 && path != ":#{block_params[0]}") || id_param
+      end
       method(type).call "/#{resource_name}/#{path}", options, do
         inject_app(res[:classes])
-        input_params = collect_input_params(params, &block)
+        input_params = collect_input_params(params, optional, &block)
 
         result = instance_exec(*input_params, &block)
         result = Serialize.to_h(result, :remove_empty => res[:remove_empty])
