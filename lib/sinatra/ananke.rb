@@ -128,12 +128,7 @@ module Sinatra
       }
       id_param = options.delete :id
       block_params = block.parameters.collect {|p| p[1]}
-      #p block.methods
-      p block.parameters
-      p '===================================='
-      if [:get,:put,:delete].include?(type)
-        path = "#{path}/:#{block_params[0]}" if (block_params.length == 1 && path != ":#{block_params[0]}") || id_param
-      end
+      path = "#{path}/:#{block_params[0]}" if (block_params.length == 1 && path != ":#{block_params[0]}") || id_param
 
       method(type).call "/#{resource_name}/#{path}", options, do
         inject_app(res[:classes])
