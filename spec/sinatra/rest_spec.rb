@@ -273,6 +273,7 @@ end
 describe Sinatra::Ananke, "#one" do
 
   it "should register a valid get route for a specific resource in the format {resource}/{id}" do
+    class Test; make_resource :test, :id => :key, :link_to => [:to], :link_self => false end
     class Test; one{|key| key.should == 1.0} end
 
     env = Rack::MockRequest.env_for("/test/1.0")
@@ -286,6 +287,7 @@ end
 describe Sinatra::Ananke, "#all" do
 
   it "should register a valid get all route for all instances of a resource in the format {resource}/?" do
+    class Test; make_resource :test end
     class Test; all{ 'emptyness' } end
 
     env = Rack::MockRequest.env_for("/test")
@@ -299,6 +301,7 @@ end
 describe Sinatra::Ananke, "#add" do
 
   it "should register a valid get all route for all instances of a resource in the format {resource}/?" do
+    class Test; make_resource :test end
     class Test; add{|name| name.should == 'Lucky' } end
 
     env = Rack::MockRequest.env_for("/test?name=Lucky", "REQUEST_METHOD" => "POST")
@@ -312,6 +315,7 @@ end
 describe Sinatra::Ananke, "#edit" do
 
   it "should register a valid get all route for all instances of a resource in the format {resource}/?" do
+    class Test; make_resource :test end
     class Test; edit{|key, name| key.should == 1; name.should == 'Lucky' } end
 
     env = Rack::MockRequest.env_for("/test/1?name=Lucky", "REQUEST_METHOD" => "PUT")
@@ -325,6 +329,7 @@ end
 describe Sinatra::Ananke, "#trash" do
 
   it "should register a valid get all route for all instances of a resource in the format {resource}/?" do
+    class Test; make_resource :test end
     class Test; trash{|key| key.should == 1 } end
 
     env = Rack::MockRequest.env_for("/test/1", "REQUEST_METHOD" => "DELETE")
@@ -338,9 +343,10 @@ end
 describe Sinatra::Ananke, "#add" do
 
   it "should be able to use form data as paramaters" do
+    class Test; make_resource :test end
     class Test; post!(:form_data){|name| name.should == 'Lucky' } end
 
-    env = Rack::MockRequest.env_for("/test", "REQUEST_METHOD" => "POST", :input => "name=Lucky")
+    env = Rack::MockRequest.env_for("/test/form_data", "REQUEST_METHOD" => "POST", :input => "name=Lucky")
     status, header, body = Test.new.call(env)
     status.should == 200
     body[0].should == '[true]'
