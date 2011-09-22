@@ -13,23 +13,25 @@ task :release => :build do
   system "gem push ananke-#{Ananke::VERSION}.gem"
 end
 
-#Testing tasks
-def make_task(name, html = false, path = 'spec')
-  options = ["-c", "-r ./spec/spec_helper.rb"]
-  options << "-f progress" if !html
-  options << "-o results/test_results.htm" if html
-  pattern = path.end_with?('.rb') ? path : "#{path}/**/*_spec.rb"
+task :doc do
+  require 'rdoc/markup/to_html'
+  h = RDoc::Markup::ToHtml.new
+  content = File.open('README.rdoc', 'rb').read
+  File.open('README.html', 'w'){|f|f.write(h.convert(content))}
+  system "google-chrome README.html"
+end
 
+#Testing tasks
+def make_task(name, path = 'spec')
   RSpec::Core::RakeTask.new(name) do |t|
-    t.rspec_opts = options
-    t.pattern = pattern
+    t.rspec_opts = ["-c", "-f progress", "-r ./spec/spec_helper.rb"]
+    t.pattern = path.end_with?('.rb') ? path : "#{path}/**/*_spec.rb"
   end
 end
 
 make_task(:test)
-make_task(:rest,        false,  'spec/sinatra/rest_spec.rb')
-make_task(:dsl,         false,  'spec/sinatra/dsl_spec.rb')
-make_task(:mime,        false,  'spec/sinatra/mime_spec.rb.not_ready')
-make_task(:doc,         true)
+make_task(:rest, 'spec/sinatra/rest_spec.rb')
+make_task(:dsl,  'spec/sinatra/dsl_spec.rb')
+make_task(:mime, 'spec/sinatra/mime_spec.rb.not_ready')
 
 task :default => [:test]

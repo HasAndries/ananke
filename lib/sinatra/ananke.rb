@@ -125,17 +125,27 @@ module Sinatra
           :link_self => resource_link_self?,
           :link_to => resource_link_to,
           :classes => resource_classes,
-          :remove_empty => resource_remove_empty
+          :remove_empty => resource_remove_empty,
+          :optional => options.delete(:optional) || []
       }
       id_param = options.delete(:id)
-      optional = options.delete(:optional) || []
       block_params = block.parameters.collect {|p| p[1]}
+      path_sym = path.to_s.delete(':').to_sym
       if [:get,:put,:delete].include?(type)
-        path = "#{path}/:#{block_params[0]}" if (block_params.length == 1 && path != ":#{block_params[0]}") || id_param
+        path = case
+          when id_param
+            "#{path}/:#{id_param}"
+          when path_sym == res[:id]
+            ":#{block_params[0]}"
+          when block_params.length == 1
+            "#{path}/:#{block_params[0]}"
+          else
+            path
+        end
       end
       method(type).call "/#{resource_name}/#{path}", options, do
         inject_app(res[:classes])
-        input_params = collect_input_params(params, optional, &block)
+        input_params = collect_input_params(params, res[:optional], &block)
 
         result = instance_exec(*input_params, &block)
         result = Serialize.to_h(result, :remove_empty => res[:remove_empty])
@@ -145,8 +155,8 @@ module Sinatra
         (result.class == Array && result || [result]).each do |item|
           next unless item.respond_to?(:has_key?) && item.has_key?(res[:id])
           links = []
-          links << {:rel => :self, :href => "/#{res[:name]}/#{item[res[:id]]}"} if res[:link_self]
-          links.concat(res[:link_to].collect { |link| {:rel => link, :href => "/#{link}/#{res[:name]}/#{item[res[:id]]}"}})
+          links << {:rel => :self, :action => "GET", :href => "/#{res[:name]}/#{item[res[:id]]}"} if res[:link_self]
+          links.concat(res[:link_to].collect { |link| {:rel => link, :action => "GET", :href => "/#{link}/#{res[:name]}/#{item[res[:id]]}"}})
           item[:links] = links unless links.empty?
         end
 
