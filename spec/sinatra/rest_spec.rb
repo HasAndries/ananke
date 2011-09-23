@@ -233,6 +233,72 @@ describe Sinatra::Ananke, "#delete!" do
 
 end
 
+describe Sinatra::Ananke, "#one" do
+
+  it "should register a valid get route in the format {resource}/{id}" do
+    class Test; make_resource :test, :linking => false end
+    class Test; one{|key| key.should == 1.0} end
+
+    env = Rack::MockRequest.env_for("/test/1.0")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+    body[0].should == '[true]'
+  end
+
+end
+
+describe Sinatra::Ananke, "#all" do
+
+  it "should register a valid get all route in the format {resource}/?" do
+    class Test; all{ 'emptyness' } end
+
+    env = Rack::MockRequest.env_for("/test")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+    body[0].should == '["emptyness"]'
+  end
+
+end
+
+describe Sinatra::Ananke, "#add" do
+
+  it "should register a valid post route in the format {resource}/?" do
+    class Test; add{|name| name.should == 'Lucky' } end
+
+    env = Rack::MockRequest.env_for("/test?name=Lucky", "REQUEST_METHOD" => "POST")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+    body[0].should == '[true]'
+  end
+
+end
+
+describe Sinatra::Ananke, "#edit" do
+
+  it "should register a valid put route in the format {resource}/?" do
+    class Test; edit{|key, name| key.should == 1; name.should == 'Lucky' } end
+
+    env = Rack::MockRequest.env_for("/test/1?name=Lucky", "REQUEST_METHOD" => "PUT")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+    body[0].should == '[true]'
+  end
+
+end
+
+describe Sinatra::Ananke, "#trash" do
+
+  it "should register a valid delete route in the format {resource}/?" do
+    class Test; trash{|key| key.should == 1 } end
+
+    env = Rack::MockRequest.env_for("/test/1", "REQUEST_METHOD" => "DELETE")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+    body[0].should == '[true]'
+  end
+
+end
+
 describe Sinatra::Ananke, '#Linking' do
 
   it "should set the resource id" do
@@ -242,16 +308,13 @@ describe Sinatra::Ananke, '#Linking' do
   end
 
   it "should set the resource to link to itself" do
-    class Test; make_resource :test, :id => :key end
-    class Test; get!(:link_self){ {:key => 1, :name => 'Lucky'}} end
+    class Test; make_resource :test end
+    class Test; one{|id| id.should == 1.0} end
 
-    Test.resource_id.should == :key
-    Test.resource_link_self?.should == true
-
-    env = Rack::MockRequest.env_for("/test/link_self")
+    env = Rack::MockRequest.env_for("/test/1.0")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"key":1,"name":"Lucky","links":[{"rel":"self","href":"/test/1"}]}'
+    #body[0].should == '{"key":1,"name":"Lucky","links":[{"rel":"self","action":"GET","href":"/test/1"}]}'
   end
 
   it "should set the resource to link to another resource" do
@@ -265,72 +328,7 @@ describe Sinatra::Ananke, '#Linking' do
     env = Rack::MockRequest.env_for("/test/link_to")
     status, header, body = Test.new.call(env)
     status.should == 200
-    body[0].should == '{"key":1,"name":"Lucky","links":[{"rel":"to","href":"/to/test/1"}]}'
-  end
-
-end
-
-describe Sinatra::Ananke, "#one" do
-
-  it "should register a valid get route for a specific resource in the format {resource}/{id}" do
-    class Test; one{|key| key.should == 1.0} end
-
-    env = Rack::MockRequest.env_for("/test/1.0")
-    status, header, body = Test.new.call(env)
-    status.should == 200
-    body[0].should == '[true]'
-  end
-
-end
-
-describe Sinatra::Ananke, "#all" do
-
-  it "should register a valid get all route for all instances of a resource in the format {resource}/?" do
-    class Test; all{ 'emptyness' } end
-
-    env = Rack::MockRequest.env_for("/test")
-    status, header, body = Test.new.call(env)
-    status.should == 200
-    body[0].should == '["emptyness"]'
-  end
-
-end
-
-describe Sinatra::Ananke, "#add" do
-
-  it "should register a valid get all route for all instances of a resource in the format {resource}/?" do
-    class Test; add{|name| name.should == 'Lucky' } end
-
-    env = Rack::MockRequest.env_for("/test?name=Lucky", "REQUEST_METHOD" => "POST")
-    status, header, body = Test.new.call(env)
-    status.should == 200
-    body[0].should == '[true]'
-  end
-
-end
-
-describe Sinatra::Ananke, "#edit" do
-
-  it "should register a valid get all route for all instances of a resource in the format {resource}/?" do
-    class Test; edit{|key, name| key.should == 1; name.should == 'Lucky' } end
-
-    env = Rack::MockRequest.env_for("/test/1?name=Lucky", "REQUEST_METHOD" => "PUT")
-    status, header, body = Test.new.call(env)
-    status.should == 200
-    body[0].should == '[true]'
-  end
-
-end
-
-describe Sinatra::Ananke, "#trash" do
-
-  it "should register a valid get all route for all instances of a resource in the format {resource}/?" do
-    class Test; trash{|key| key.should == 1 } end
-
-    env = Rack::MockRequest.env_for("/test/1", "REQUEST_METHOD" => "DELETE")
-    status, header, body = Test.new.call(env)
-    #status.should == 200
-    body[0].should == '[true]'
+    body[0].should == '{"key":1,"name":"Lucky","links":[{"rel":"to","action":"GET","href":"/to/test/1"}]}'
   end
 
 end
@@ -340,7 +338,7 @@ describe Sinatra::Ananke, "#add" do
   it "should be able to use form data as paramaters" do
     class Test; post!(:form_data){|name| name.should == 'Lucky' } end
 
-    env = Rack::MockRequest.env_for("/test", "REQUEST_METHOD" => "POST", :input => "name=Lucky")
+    env = Rack::MockRequest.env_for("/test/form_data", "REQUEST_METHOD" => "POST", :input => "name=Lucky")
     status, header, body = Test.new.call(env)
     status.should == 200
     body[0].should == '[true]'

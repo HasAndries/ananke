@@ -3,24 +3,13 @@
 Ananke is a DSL that extends the functionality of Sinatra for easy creation of Restful Services and Resources:
 
   #myapp.rb
-  require 'ananke'
-  require 'sinatra/main' #This is only for Demo purposes
-  #--------------------Repositories---------------------
-  module Repository
-    module User
-      @data = [{:id => '1', :name => 'One'}, {:id => '2', :name => 'Two'}]
-      def self.all
-        @data.to_s
-      end
-      def self.one(id)
-        index = @data.index{ |d| d[:id] == id}
-        (index.nil? && '') || @data[index].to_s
-      end
+  require 'sinatra/base'
+  require 'sinatra/ananke'
+  
+  resource :user do
+    all do
+      [{:id => ]
     end
-  end
-  #-------------------REST Resources--------------------
-  route :user do
-    id :id
   end
 
 Install the gem and run with:

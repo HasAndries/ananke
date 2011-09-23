@@ -7,6 +7,7 @@ gem "sinatra", "~>1.2.6"
 group :development, :test do
   gem "rack-test", "~>0.6.1"
   gem "rake", "~>0.9.2"
+  gem "rdoc", "~>3.9.4"
   gem "rspec", "~>2.6.0"
   gem 'simplecov', '~>0.5.2'
 end
