@@ -233,47 +233,10 @@ describe Sinatra::Ananke, "#delete!" do
 
 end
 
-describe Sinatra::Ananke, '#Linking' do
-
-  it "should set the resource id" do
-    class Test; make_resource :test, :id => :key end
-
-    Test.resource_id.should == :key
-  end
-
-  it "should set the resource to link to itself" do
-    class Test; make_resource :test, :id => :key end
-    class Test; get!(:link_self){ {:key => 1, :name => 'Lucky'}} end
-
-    Test.resource_id.should == :key
-    Test.resource_link_self?.should == true
-
-    env = Rack::MockRequest.env_for("/test/link_self")
-    status, header, body = Test.new.call(env)
-    status.should == 200
-    body[0].should == '{"key":1,"name":"Lucky","links":[{"rel":"self","action":"GET","href":"/test/1"}]}'
-  end
-
-  it "should set the resource to link to another resource" do
-    class Test; make_resource :test, :id => :key, :link_to => [:to], :link_self => false end
-    class Test; get!(:link_to){ {:key => 1, :name => 'Lucky'}} end
-
-    Test.resource_id.should == :key
-    Test.resource_link_to.should == [:to]
-    Test.resource_link_self?.should == false
-
-    env = Rack::MockRequest.env_for("/test/link_to")
-    status, header, body = Test.new.call(env)
-    status.should == 200
-    body[0].should == '{"key":1,"name":"Lucky","links":[{"rel":"to","action":"GET","href":"/to/test/1"}]}'
-  end
-
-end
-
 describe Sinatra::Ananke, "#one" do
 
   it "should register a valid get route in the format {resource}/{id}" do
-    class Test; make_resource :test end
+    class Test; make_resource :test, :linking => false end
     class Test; one{|key| key.should == 1.0} end
 
     env = Rack::MockRequest.env_for("/test/1.0")
@@ -332,6 +295,40 @@ describe Sinatra::Ananke, "#trash" do
     status, header, body = Test.new.call(env)
     status.should == 200
     body[0].should == '[true]'
+  end
+
+end
+
+describe Sinatra::Ananke, '#Linking' do
+
+  it "should set the resource id" do
+    class Test; make_resource :test, :id => :key end
+
+    Test.resource_id.should == :key
+  end
+
+  it "should set the resource to link to itself" do
+    class Test; make_resource :test end
+    class Test; one{|id| id.should == 1.0} end
+
+    env = Rack::MockRequest.env_for("/test/1.0")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+    #body[0].should == '{"key":1,"name":"Lucky","links":[{"rel":"self","action":"GET","href":"/test/1"}]}'
+  end
+
+  it "should set the resource to link to another resource" do
+    class Test; make_resource :test, :id => :key, :link_to => [:to], :link_self => false end
+    class Test; get!(:link_to){ {:key => 1, :name => 'Lucky'}} end
+
+    Test.resource_id.should == :key
+    Test.resource_link_to.should == [:to]
+    Test.resource_link_self?.should == false
+
+    env = Rack::MockRequest.env_for("/test/link_to")
+    status, header, body = Test.new.call(env)
+    status.should == 200
+    body[0].should == '{"key":1,"name":"Lucky","links":[{"rel":"to","action":"GET","href":"/to/test/1"}]}'
   end
 
 end
