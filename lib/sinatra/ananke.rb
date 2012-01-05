@@ -46,8 +46,8 @@ module Sinatra
           value = params[param]
           case
             when value.nil?; value
-            when value.to_i.to_s == value; value.to_i
-            when value.to_f.to_s == value; value.to_f
+            when value.respond_to?(:to_i) && value.to_i.to_s == value; value.to_i
+            when value.respond_to?(:to_f) && value.to_f.to_s == value; value.to_f
             else value
           end
         end
